@@ -1,0 +1,51 @@
+{
+  "name": "side-by-side-multiselect",
+  "version": "1.0.0",
+  "description": "a side by side multiselect",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rimraf dist && rimraf docs",
+    "postclean": "mkdirp dist && mkdirp docs",
+    "build:js": "babel src/js -d dist/js",
+    "postbuild:js": "minify dist/js/side-by-side-multiselect.js > dist/js/side-by-side-multiselect.min.js && minify dist/js/side-by-side-multiselect.js > docs/side-by-side-multiselect.min.js",
+    "build:css": "sass src/scss/side-by-side-multiselect.scss:dist/css/side-by-side-multiselect.css --no-source-map --style=expanded",
+    "postbuild:css": "minify dist/css/side-by-side-multiselect.css > dist/css/side-by-side-multiselect.min.css && minify dist/css/side-by-side-multiselect.css > docs/side-by-side-multiselect.min.css && postcss *.css --use autoprefixer -r dist/css/* --no-map",
+    "build:html": "pug src/html/ --out docs -P",
+    "build": "npm-run-all clean build:js build:css build:html",
+    "prewatch": "npm run build",
+    "watch:js": "onchange -k src/js/**/* -- npm run build:js",
+    "watch:scss": "onchange -k src/scss/**/* -- npm run build:css",
+    "watch:html": "onchange -k src/html/**/* -- npm run build:html",
+    "watch": "npm-run-all --parallel watch:js watch:scss watch:html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scheibome/side-by-side-multiselect.git"
+  },
+  "keywords": [
+    "select",
+    "javascript",
+    "sidebyside",
+    "multiselect",
+    "input"
+  ],
+  "author": "Thomas Scheibitz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/scheibome/side-by-side-multiselect/issues"
+  },
+  "homepage": "https://github.com/scheibome/side-by-side-multiselect#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.2.5",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "minify": "^7.0.2",
+    "npm-run-all": "^4.1.5",
+    "onchange": "^7.1.0",
+    "postcss-cli": "^8.3.1",
+    "pug": "^3.0.2",
+    "pug-cli": "*",
+    "rimraf": "^3.0.2",
+    "sass": "^1.32.13"
+  }
+}
