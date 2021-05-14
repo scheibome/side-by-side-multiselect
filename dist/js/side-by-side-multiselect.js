@@ -141,23 +141,6 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     };
 
     /**
-     * create the filter with eventlistener and prepend it to the sideboxes
-     * @param sideBoxes
-     * @returns {*}
-     */
-    var addFilterInput = function addFilterInput(sideBoxes) {
-        var filterfield = document.createElement('input');
-        filterfield.setAttribute('type', 'text');
-        filterfield.setAttribute('placeholder', labelFilter);
-        filterfield.classList.add(filterClassName);
-        filterfield.addEventListener('keyup', function () {
-            filterFunc(this, sideBoxes);
-        });
-        sideBoxes.parentNode.insertBefore(filterfield, sideBoxes);
-        return sideBoxes;
-    };
-
-    /**
      * Filters the options by the input
      * @param input
      * @param sideBoxes
@@ -175,6 +158,46 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
                 filterItem.style.display = 'none';
             }
         });
+    };
+
+    /**
+     * reset the created options to the selected options
+     * @param selectfield
+     * @param selectElement
+     */
+    var resetToSelectOptions = function resetToSelectOptions(selectfield, selectElement) {
+        var selectedItemsCount = selectfield.querySelectorAll('option');
+        selectedItemsCount.forEach(function (option) {
+            var addOption = selectElement.querySelector('[data-direction="add"][data-index="' + option.index + '"]');
+            var removeOption = selectElement.querySelector('[data-direction="remove"][data-index="' + option.index + '"]');
+            if (option.selected) {
+                addOption.style.display = 'block';
+                removeOption.style.display = 'none';
+            } else {
+                addOption.style.display = 'none';
+                removeOption.style.display = 'block';
+            }
+        });
+    };
+
+    /**
+     * create the filter with eventlistener and prepend it to the sideboxes
+     * @param sideBoxes
+     * @returns {*}
+     */
+    var addFilterInput = function addFilterInput(select, sideBoxes) {
+        var filterfield = document.createElement('input');
+        filterfield.setAttribute('type', 'text');
+        filterfield.setAttribute('placeholder', labelFilter);
+        filterfield.classList.add(filterClassName);
+        filterfield.addEventListener('keyup', function () {
+            filterFunc(this, sideBoxes);
+            if (this.value === '') {
+                resetToSelectOptions(select, sideBoxes);
+            }
+        });
+        sideBoxes.parentNode.insertBefore(filterfield, sideBoxes);
+        return sideBoxes;
     };
 
     /**
@@ -210,7 +233,7 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
             setSelectOption(select, selectElement);
 
             if (!options.hidefilter) {
-                selectElement = addFilterInput(selectElement);
+                selectElement = addFilterInput(select, selectElement);
             }
 
             if (!options.hideCounter) {

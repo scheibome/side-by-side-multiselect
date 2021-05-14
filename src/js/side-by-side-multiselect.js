@@ -139,23 +139,6 @@ let SideBySideMultiselect = (options) => {
     };
 
     /**
-     * create the filter with eventlistener and prepend it to the sideboxes
-     * @param sideBoxes
-     * @returns {*}
-     */
-    const addFilterInput = (sideBoxes) => {
-        let filterfield = document.createElement('input');
-        filterfield.setAttribute('type', 'text');
-        filterfield.setAttribute('placeholder', labelFilter);
-        filterfield.classList.add(filterClassName);
-        filterfield.addEventListener('keyup', function() {
-            filterFunc(this, sideBoxes);
-        });
-        sideBoxes.parentNode.insertBefore(filterfield, sideBoxes);
-        return sideBoxes;
-    };
-
-    /**
      * Filters the options by the input
      * @param input
      * @param sideBoxes
@@ -173,6 +156,46 @@ let SideBySideMultiselect = (options) => {
                 filterItem.style.display = 'none';
             }
         });
+    };
+
+    /**
+     * reset the created options to the selected options
+     * @param selectfield
+     * @param selectElement
+     */
+    const resetToSelectOptions = (selectfield, selectElement) => {
+        let selectedItemsCount = selectfield.querySelectorAll('option');
+        selectedItemsCount.forEach(function(option) {
+            let addOption = selectElement.querySelector('[data-direction="add"][data-index="' + option.index + '"]');
+            let removeOption = selectElement.querySelector('[data-direction="remove"][data-index="' + option.index + '"]');
+            if (option.selected) {
+                addOption.style.display = 'block';
+                removeOption.style.display = 'none';
+            } else {
+                addOption.style.display = 'none';
+                removeOption.style.display = 'block';
+            }
+        });
+    };
+
+    /**
+     * create the filter with eventlistener and prepend it to the sideboxes
+     * @param sideBoxes
+     * @returns {*}
+     */
+    const addFilterInput = (select, sideBoxes) => {
+        let filterfield = document.createElement('input');
+        filterfield.setAttribute('type', 'text');
+        filterfield.setAttribute('placeholder', labelFilter);
+        filterfield.classList.add(filterClassName);
+        filterfield.addEventListener('keyup', function() {
+            filterFunc(this, sideBoxes);
+            if (this.value === '') {
+                resetToSelectOptions(select, sideBoxes);
+            }
+        });
+        sideBoxes.parentNode.insertBefore(filterfield, sideBoxes);
+        return sideBoxes;
     };
 
     /**
@@ -208,7 +231,7 @@ let SideBySideMultiselect = (options) => {
             setSelectOption(select, selectElement);
 
             if (!options.hidefilter) {
-                selectElement = addFilterInput(selectElement);
+                selectElement = addFilterInput(select, selectElement);
             }
 
             if (!options.hideCounter) {
