@@ -32,7 +32,7 @@ You can check the live demo [right here](https://scheibome.github.io/side-by-sid
 
 <script src="side-by-side-multiselect.min.js"></script>
 <script type="text/javascript">
-    side-by-side-multiselect();
+    SideBySideMultiselect();
 </script>
 ~~~
 
@@ -54,7 +54,7 @@ You can check the live demo [right here](https://scheibome.github.io/side-by-sid
 
 <script src="side-by-side-multiselect.min.js"></script>
 <script type="text/javascript">
-    side-by-side-multiselect({
+    SideBySideMultiselect({
         'selector': '.myselectfield',
         'hidefilter': true
     });
@@ -66,7 +66,7 @@ You can check the live demo [right here](https://scheibome.github.io/side-by-sid
 Example use of the options.
 
 ~~~javascript
-side-by-side-multiselect({
+SideBySideMultiselect({
     'selector': '.js-sidebysidemultiselect',
     'hidefilter': true,
     'hideCounter': false,
