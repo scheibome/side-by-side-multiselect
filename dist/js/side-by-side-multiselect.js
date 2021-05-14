@@ -13,6 +13,7 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     var boxesClassName = classSettings && classSettings.boxesclass ? classSettings.boxesclass : 'side-by-side-multiselect__inner';
     var filterClassName = classSettings && classSettings.filterclass ? classSettings.filterclass : 'side-by-side-multiselect__filter';
     var counterClassName = classSettings && classSettings.counterclass ? classSettings.counterclass : 'side-by-side-multiselect__counter';
+    var errorText = 'Error, the select must been a multible select';
 
     var labels = options.labels;
     var labelFilter = labels && labels.filter ? labels.filter : 'Filter';
@@ -177,6 +178,26 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     };
 
     /**
+     * Check if the select a multible select
+     * if not, display a errormessage
+     * @param select
+     * @returns {boolean}
+     */
+    var checkIfMultiple = function checkIfMultiple(select) {
+        if (select.type !== 'select-multiple') {
+            var errorMessage = document.createElement('p');
+            errorMessage.innerText = errorText;
+            errorMessage.style.backgroundColor = 'red';
+            errorMessage.style.padding = '1rem';
+            errorMessage.style.color = 'white';
+            select.parentNode.insertBefore(errorMessage, select);
+            console.log(errorText, ':', select);
+            return false;
+        }
+        return true;
+    };
+
+    /**
      * init function
      * hide the default select
      * add the filter and counter
@@ -184,21 +205,23 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
      */
     selectElements.forEach(function (select) {
         select.style.display = 'none';
-        var selectElement = createSideBySideMultiSelectBoxes(select);
-        setSelectOption(select, selectElement);
+        if (checkIfMultiple(select)) {
+            var selectElement = createSideBySideMultiSelectBoxes(select);
+            setSelectOption(select, selectElement);
 
-        if (!options.hidefilter) {
-            selectElement = addFilterInput(selectElement);
+            if (!options.hidefilter) {
+                selectElement = addFilterInput(selectElement);
+            }
+
+            if (!options.hideCounter) {
+                var counterBox = addCounter();
+                selectElement.appendChild(counterBox);
+                calcCounter(select, selectElement);
+            }
+
+            selectElement.addEventListener('click', function (e) {
+                addClickEventToOption(e, select, selectElement);
+            });
         }
-
-        if (!options.hideCounter) {
-            var counterBox = addCounter();
-            selectElement.appendChild(counterBox);
-            calcCounter(select, selectElement);
-        }
-
-        selectElement.addEventListener('click', function (e) {
-            addClickEventToOption(e, select, selectElement);
-        });
     });
 };
