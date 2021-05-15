@@ -7,6 +7,8 @@ Side by side select for multiselect
 
 You can check the live demo [right here](https://scheibome.github.io/side-by-side-multiselect/)
 
+![Side by side select for multiselect demo](src/images/demo.gif)
+
 ## Style setup in css
 
 ~~~css
