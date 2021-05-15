@@ -6,14 +6,7 @@
   justify-content: space-between;
   margin-bottom: 1rem;
 
-  &__inner {
-    width: calc(50% - 0.5rem);
-    border: var(--sideBySiteMultiSelectBorderWidth) solid var(--sideBySiteMultiSelectColor);
-    overflow-y: auto;
-    height: var(--sideBySiteMultiSelectHeight);
-  }
-
-  &__filter {
+  &filter {
     width: calc(50% - 0.5rem);
     border: solid var(--sideBySiteMultiSelectColor);
     border-width: var(--sideBySiteMultiSelectBorderWidth) var(--sideBySiteMultiSelectBorderWidth) 0;
@@ -26,6 +19,18 @@
       color: var(--sideBySiteMultiSelectSearchFocusColor);
       background-color: var(--sideBySiteMultiSelectSearchFocusBgColor);
     }
+  }
+
+  &label {
+    display: block;
+    padding: 0.5rem;
+  }
+
+  &__inner {
+    width: calc(50% - 0.5rem);
+    border: var(--sideBySiteMultiSelectBorderWidth) solid var(--sideBySiteMultiSelectColor);
+    overflow-y: auto;
+    height: var(--sideBySiteMultiSelectHeight);
   }
 
   &__counter {

@@ -9,8 +9,9 @@ let SideBySideMultiselect = (options) => {
     let wrapperClassName = (classSettings && classSettings.wrapperclass) ? classSettings.wrapperclass : 'side-by-side-multiselect';
     let optionClassName = (classSettings && classSettings.optionclass) ? classSettings.optionclass : 'side-by-side-multiselect__option';
     let boxesClassName = (classSettings && classSettings.boxesclass) ? classSettings.boxesclass : 'side-by-side-multiselect__inner';
-    let filterClassName = (classSettings && classSettings.filterclass) ? classSettings.filterclass : 'side-by-side-multiselect__filter';
+    let filterClassName = (classSettings && classSettings.filterclass) ? classSettings.filterclass : 'side-by-side-multiselectfilter';
     let counterClassName = (classSettings && classSettings.counterclass) ? classSettings.counterclass : 'side-by-side-multiselect__counter';
+    let labelClassName = (classSettings && classSettings.labelclass) ? classSettings.labelclass : 'side-by-side-multiselectlabel';
     let errorText = 'Error, the select must been a multible select';
 
     let labels = options.labels;
@@ -334,14 +335,26 @@ let SideBySideMultiselect = (options) => {
     };
 
     /**
+     * find the label for the select and add a new class
+     * @param select
+     */
+    const findLabelOfSelectAndSetBlock = (select) => {
+        let selectLabel = document.querySelector('label[for="' + select.id + '"]');
+        if (selectLabel) {
+            selectLabel.classList.add(labelClassName);
+        }
+    };
+
+    /**
      * init function
      * hide the default select
      * add the filter and counter
      * add the click events
      */
     selectElements.forEach(function(select) {
-        select.style.display = 'none';
         if (checkIfMultiple(select)) {
+            select.style.display = 'none';
+            findLabelOfSelectAndSetBlock(select);
             let wrapper = createSideBySideMultiSelectBoxes(select);
             setSelectOption(select, wrapper);
 

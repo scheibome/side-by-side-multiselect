@@ -75,6 +75,7 @@ SideBySideMultiselect({
         'selected': 'Selected'
     },
     classSettings: {
+        'labelclass': 'your-labelclass',
         'wrapperclass': 'your-wrapperclass',
         'optionclass': 'your-optionclass',
         'boxesclass': 'your-boxesrclass',

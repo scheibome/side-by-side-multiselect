@@ -11,8 +11,9 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     var wrapperClassName = classSettings && classSettings.wrapperclass ? classSettings.wrapperclass : 'side-by-side-multiselect';
     var optionClassName = classSettings && classSettings.optionclass ? classSettings.optionclass : 'side-by-side-multiselect__option';
     var boxesClassName = classSettings && classSettings.boxesclass ? classSettings.boxesclass : 'side-by-side-multiselect__inner';
-    var filterClassName = classSettings && classSettings.filterclass ? classSettings.filterclass : 'side-by-side-multiselect__filter';
+    var filterClassName = classSettings && classSettings.filterclass ? classSettings.filterclass : 'side-by-side-multiselectfilter';
     var counterClassName = classSettings && classSettings.counterclass ? classSettings.counterclass : 'side-by-side-multiselect__counter';
+    var labelClassName = classSettings && classSettings.labelclass ? classSettings.labelclass : 'side-by-side-multiselectlabel';
     var errorText = 'Error, the select must been a multible select';
 
     var labels = options.labels;
@@ -335,14 +336,26 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     };
 
     /**
+     * find the label for the select and add a new class
+     * @param select
+     */
+    var findLabelOfSelectAndSetBlock = function findLabelOfSelectAndSetBlock(select) {
+        var selectLabel = document.querySelector('label[for="' + select.id + '"]');
+        if (selectLabel) {
+            selectLabel.classList.add(labelClassName);
+        }
+    };
+
+    /**
      * init function
      * hide the default select
      * add the filter and counter
      * add the click events
      */
     selectElements.forEach(function (select) {
-        select.style.display = 'none';
         if (checkIfMultiple(select)) {
+            select.style.display = 'none';
+            findLabelOfSelectAndSetBlock(select);
             var wrapper = createSideBySideMultiSelectBoxes(select);
             setSelectOption(select, wrapper);
 
