@@ -126,7 +126,7 @@ let SideBySideMultiselect = (options) => {
         singleBox.addEventListener('keydown', function (e) {
             if (e.key === 'ArrowDown' || e.key === 'ArrowUp' ) {
                 setKeyboardUpAndDownSelect(e, singleBox);
-            } else if (e.key === ' ') {
+            } else if (e.key === ' ' || e.key === 'Enter') {
                 selectOptionViaKeyboard(e, select, wrapper);
             }
         });
