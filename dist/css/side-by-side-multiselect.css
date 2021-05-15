@@ -30,6 +30,9 @@
   overflow-y: auto;
   height: var(--sideBySiteMultiSelectHeight);
 }
+.side-by-side-multiselect__inner:focus {
+  background-color: var(--sideBySiteMultiSelectSearchFocusBgColor);
+}
 .side-by-side-multiselect__counter {
   width: 100%;
   font-size: 0.8rem;

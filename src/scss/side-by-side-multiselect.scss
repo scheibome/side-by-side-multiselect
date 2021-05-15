@@ -31,6 +31,10 @@
     border: var(--sideBySiteMultiSelectBorderWidth) solid var(--sideBySiteMultiSelectColor);
     overflow-y: auto;
     height: var(--sideBySiteMultiSelectHeight);
+
+    &:focus {
+      background-color: var(--sideBySiteMultiSelectSearchFocusBgColor);
+    }
   }
 
   &__counter {
