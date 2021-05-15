@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.0
+
+- [FEATURE] add label to filter input and add placeholder optional
+
 ## 1.1.0
 
 - [BUGFIX] reset unselect options if the filter are empty

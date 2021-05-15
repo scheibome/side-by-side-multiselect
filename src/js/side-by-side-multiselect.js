@@ -9,7 +9,9 @@ let SideBySideMultiselect = (options) => {
     let wrapperClassName = (classSettings && classSettings.wrapperclass) ? classSettings.wrapperclass : 'side-by-side-multiselect';
     let optionClassName = (classSettings && classSettings.optionclass) ? classSettings.optionclass : 'side-by-side-multiselect__option';
     let boxesClassName = (classSettings && classSettings.boxesclass) ? classSettings.boxesclass : 'side-by-side-multiselect__inner';
-    let filterClassName = (classSettings && classSettings.filterclass) ? classSettings.filterclass : 'side-by-side-multiselectfilter';
+    let filterWrapperClassName = (classSettings && classSettings.filterwrapperclass) ? classSettings.filterwrapperclass : 'side-by-side-multiselectfilter';
+    let filterClassName = (classSettings && classSettings.filterclass) ? classSettings.filterclass : 'side-by-side-multiselectfilter__input';
+    let filterLabelClassName = (classSettings && classSettings.filterlabelclass) ? classSettings.filterlabelclass : 'side-by-side-multiselectfilter__label';
     let counterClassName = (classSettings && classSettings.counterclass) ? classSettings.counterclass : 'side-by-side-multiselect__counter';
     let labelClassName = (classSettings && classSettings.labelclass) ? classSettings.labelclass : 'side-by-side-multiselectlabel';
     let errorText = 'Error, the select must been a multible select';
@@ -293,6 +295,43 @@ let SideBySideMultiselect = (options) => {
         });
     };
 
+    const createFilter = (select, wrapper) => {
+        // FilterWrapper
+        let filterWrapper = document.createElement('div');
+        filterWrapper.classList.add(filterWrapperClassName);
+
+        // FilterLabel
+        let filterLabel = document.createElement('label');
+        filterLabel.innerText = labelFilter;
+        filterLabel.classList.add(filterLabelClassName);
+        filterLabel.setAttribute('for', select.id + '-filter');
+
+        // FilterInput
+        let filterField = document.createElement('input');
+        filterField.id = select.id + '-filter';
+        filterField.setAttribute('type', 'text');
+        if (options.showfilterplaceholder) {
+            filterField.setAttribute('placeholder', labelFilter);
+        }
+        filterField.classList.add(filterClassName);
+        filterField.addEventListener('keyup', function() {
+            filterFunc(this, wrapper);
+            if (this.value === '') {
+                resetToSelectOptions(select, wrapper);
+                filterField.classList.remove('isfilled');
+            } else {
+                filterField.classList.add('isfilled');
+            }
+        });
+
+        filterWrapper.appendChild(filterField);
+        if (!options.hidefilterlabel) {
+            filterWrapper.appendChild(filterLabel);
+        }
+
+        return filterWrapper;
+    };
+
     /**
      * create the filter with eventlistener and prepend it to the wrapper
      * @param select
@@ -300,17 +339,8 @@ let SideBySideMultiselect = (options) => {
      * @returns {*}
      */
     const addFilterInput = (select, wrapper) => {
-        let filterfield = document.createElement('input');
-        filterfield.setAttribute('type', 'text');
-        filterfield.setAttribute('placeholder', labelFilter);
-        filterfield.classList.add(filterClassName);
-        filterfield.addEventListener('keyup', function() {
-            filterFunc(this, wrapper);
-            if (this.value === '') {
-                resetToSelectOptions(select, wrapper);
-            }
-        });
-            wrapper.parentNode.insertBefore(filterfield, wrapper);
+        let filterWrapper = createFilter(select, wrapper);
+        wrapper.parentNode.insertBefore(filterWrapper, wrapper);
         return wrapper;
     };
 

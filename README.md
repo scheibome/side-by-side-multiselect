@@ -72,6 +72,8 @@ SideBySideMultiselect({
     'selector': '.js-sidebysidemultiselect',
     'hidefilter': true,
     'hideCounter': false,
+    'showfilterplaceholder': true,
+    'hidefilterlabel': true,
     labels: {
         'filter': 'Filter',
         'selected': 'Selected'
@@ -91,6 +93,8 @@ SideBySideMultiselect({
 | --- | --- | --- | --- |
 | selector | string | `.js-sidebysidemultiselect` | Name of the selector for example '.js-sidebysidemultiselect' |
 | hideFilter | boolean | `false` | Hide the filter |
+| hidefilterlabel | boolean | `false` | add a label to filter input  |
+| showfilterplaceholder | boolean | `false` | Add a placeholder to the filter input  |
 | classSettings | object | `See options example` | Name of the skin, it will add a class to the lightbox so you can style it with css. |
 | hideCounter | boolean | `false` | Hide the counter |
 | labels | object | `See options example` | The label content  |

@@ -11,7 +11,9 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     var wrapperClassName = classSettings && classSettings.wrapperclass ? classSettings.wrapperclass : 'side-by-side-multiselect';
     var optionClassName = classSettings && classSettings.optionclass ? classSettings.optionclass : 'side-by-side-multiselect__option';
     var boxesClassName = classSettings && classSettings.boxesclass ? classSettings.boxesclass : 'side-by-side-multiselect__inner';
-    var filterClassName = classSettings && classSettings.filterclass ? classSettings.filterclass : 'side-by-side-multiselectfilter';
+    var filterWrapperClassName = classSettings && classSettings.filterwrapperclass ? classSettings.filterwrapperclass : 'side-by-side-multiselectfilter';
+    var filterClassName = classSettings && classSettings.filterclass ? classSettings.filterclass : 'side-by-side-multiselectfilter__input';
+    var filterLabelClassName = classSettings && classSettings.filterlabelclass ? classSettings.filterlabelclass : 'side-by-side-multiselectfilter__label';
     var counterClassName = classSettings && classSettings.counterclass ? classSettings.counterclass : 'side-by-side-multiselect__counter';
     var labelClassName = classSettings && classSettings.labelclass ? classSettings.labelclass : 'side-by-side-multiselectlabel';
     var errorText = 'Error, the select must been a multible select';
@@ -294,6 +296,43 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
         });
     };
 
+    var createFilter = function createFilter(select, wrapper) {
+        // FilterWrapper
+        var filterWrapper = document.createElement('div');
+        filterWrapper.classList.add(filterWrapperClassName);
+
+        // FilterLabel
+        var filterLabel = document.createElement('label');
+        filterLabel.innerText = labelFilter;
+        filterLabel.classList.add(filterLabelClassName);
+        filterLabel.setAttribute('for', select.id + '-filter');
+
+        // FilterInput
+        var filterField = document.createElement('input');
+        filterField.id = select.id + '-filter';
+        filterField.setAttribute('type', 'text');
+        if (options.showfilterplaceholder) {
+            filterField.setAttribute('placeholder', labelFilter);
+        }
+        filterField.classList.add(filterClassName);
+        filterField.addEventListener('keyup', function () {
+            filterFunc(this, wrapper);
+            if (this.value === '') {
+                resetToSelectOptions(select, wrapper);
+                filterField.classList.remove('isfilled');
+            } else {
+                filterField.classList.add('isfilled');
+            }
+        });
+
+        filterWrapper.appendChild(filterField);
+        if (!options.hidefilterlabel) {
+            filterWrapper.appendChild(filterLabel);
+        }
+
+        return filterWrapper;
+    };
+
     /**
      * create the filter with eventlistener and prepend it to the wrapper
      * @param select
@@ -301,17 +340,8 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
      * @returns {*}
      */
     var addFilterInput = function addFilterInput(select, wrapper) {
-        var filterfield = document.createElement('input');
-        filterfield.setAttribute('type', 'text');
-        filterfield.setAttribute('placeholder', labelFilter);
-        filterfield.classList.add(filterClassName);
-        filterfield.addEventListener('keyup', function () {
-            filterFunc(this, wrapper);
-            if (this.value === '') {
-                resetToSelectOptions(select, wrapper);
-            }
-        });
-        wrapper.parentNode.insertBefore(filterfield, wrapper);
+        var filterWrapper = createFilter(select, wrapper);
+        wrapper.parentNode.insertBefore(filterWrapper, wrapper);
         return wrapper;
     };
 
