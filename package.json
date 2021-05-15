@@ -36,9 +36,9 @@
   },
   "homepage": "https://github.com/scheibome/side-by-side-multiselect#readme",
   "devDependencies": {
+    "@babel/cli": "^7.13.16",
+    "@babel/preset-env": "^7.14.2",
     "autoprefixer": "^10.2.5",
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
     "minify": "^7.0.2",
     "npm-run-all": "^4.1.5",
     "onchange": "^7.1.0",
