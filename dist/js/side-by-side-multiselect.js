@@ -20,23 +20,135 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     var labelSelected = labels && labels.selected ? labels.selected : 'Selected: ';
 
     /**
-     * create the multiselect wrapper with the eompty inner boxes
-     * @param selectField
+     * get the next sibling with given parameter
+     * @param elem
+     * @param selector
+     * @returns {Element}
+     */
+    var getNextSibling = function getNextSibling(elem, selector) {
+        var sibling = elem.nextElementSibling;
+        if (!selector) {
+            return sibling;
+        }
+        while (sibling) {
+            if (sibling.matches(selector)) {
+                return sibling;
+            }
+            sibling = sibling.nextElementSibling;
+        }
+    };
+
+    /**
+     * get the previous sibling with given parameter
+     * @param elem
+     * @param selector
+     * @returns {Element}
+     */
+    var getPreviousSibling = function getPreviousSibling(elem, selector) {
+        var sibling = elem.previousElementSibling;
+        if (!selector) {
+            return sibling;
+        }
+        while (sibling) {
+            if (sibling.matches(selector)) {
+                return sibling;
+            }
+            sibling = sibling.previousElementSibling;
+        }
+    };
+
+    /**
+     * select on first focus the first visible element
+     * after press arrow up jumps the focus to the previous sibling
+     * after press arrow down jumps the focus to the next sibling
+     * @param e
+     * @param singleBox
+     */
+    var setKeyboardUpAndDownSelect = function setKeyboardUpAndDownSelect(e, singleBox) {
+        e.preventDefault();
+        var activeElement = document.activeElement;
+        var nextSiblingOption = getNextSibling(activeElement, ':not([style="display: none;"]');
+        var previousSiblingOption = getPreviousSibling(activeElement, ':not([style="display: none;"]');
+        if (activeElement.classList.contains(boxesClassName)) {
+            var firstSingleBoxOption = singleBox.querySelector('.' + optionClassName + ':not([style="display: none;"])');
+            if (firstSingleBoxOption) {
+                firstSingleBoxOption.focus();
+            }
+        } else {
+            if (e.key === 'ArrowUp') {
+                if (typeof previousSiblingOption !== 'undefined') {
+                    previousSiblingOption.focus();
+                }
+            } else if (e.key === 'ArrowDown') {
+                if (typeof nextSiblingOption !== 'undefined') {
+                    nextSiblingOption.focus();
+                }
+            }
+        }
+    };
+
+    /**
+     * select the focused element and set the focus to the next or prev
+     * @param e
+     * @param select
+     * @param wrapper
+     */
+    var selectOptionViaKeyboard = function selectOptionViaKeyboard(e, select, wrapper) {
+        e.preventDefault();
+        var activeElement = document.activeElement;
+        var nextSiblingOption = getNextSibling(activeElement, ':not([style="display: none;"]');
+        var previousSiblingOption = getPreviousSibling(activeElement, ':not([style="display: none;"]');
+        if (typeof nextSiblingOption !== 'undefined') {
+            nextSiblingOption.focus();
+        } else if (typeof previousSiblingOption !== 'undefined') {
+            previousSiblingOption.focus();
+        } else {
+            activeElement.parentNode.focus();
+        }
+        if (typeof previousSiblingOption !== 'undefined') {
+            previousSiblingOption.focus();
+        }
+        addClickEventToOption(activeElement, select, wrapper);
+    };
+
+    /**
+     * create a single box for the options
+     * @param wrapper
+     * @param select
      * @returns {HTMLDivElement}
      */
-    var createSideBySideMultiSelectBoxes = function createSideBySideMultiSelectBoxes(selectField) {
+    var createSingleBox = function createSingleBox(wrapper, select) {
+        var singleBox = document.createElement('div');
+        singleBox.setAttribute('role', 'listbox');
+        singleBox.setAttribute('aria-expanded', 'true');
+        singleBox.setAttribute('tabindex', '0');
+        singleBox.classList.add(boxesClassName);
+        singleBox.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                setKeyboardUpAndDownSelect(e, singleBox);
+            } else if (e.key === ' ') {
+                selectOptionViaKeyboard(e, select, wrapper);
+            }
+        });
+        return singleBox;
+    };
+
+    /**
+     * create the multiselect wrapper with the eompty inner boxes
+     * @param select
+     * @returns {HTMLDivElement}
+     */
+    var createSideBySideMultiSelectBoxes = function createSideBySideMultiSelectBoxes(select) {
         var wrapper = document.createElement('div');
         wrapper.classList.add(wrapperClassName);
 
-        var leftBox = document.createElement('div');
-        leftBox.classList.add(boxesClassName);
+        var leftBox = createSingleBox(wrapper, select);
         wrapper.appendChild(leftBox);
 
-        var rightBox = document.createElement('div');
-        rightBox.classList.add(boxesClassName);
+        var rightBox = createSingleBox(wrapper, select);
         wrapper.appendChild(rightBox);
 
-        selectField.parentNode.insertBefore(wrapper, selectField.nextSibling);
+        select.parentNode.insertBefore(wrapper, select.nextSibling);
         return wrapper;
     };
 
@@ -49,13 +161,15 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     var createSelectOption = function createSelectOption(option, direction) {
         var optionElement = document.createElement('div');
         optionElement.innerHTML = option.text;
+        optionElement.setAttribute('role', 'option');
+        optionElement.setAttribute('tabindex', '-1');
         optionElement.classList.add(optionClassName);
         optionElement.setAttribute('data-index', option.index);
 
         if (direction === 1) {
             optionElement.setAttribute('data-direction', 'add');
             if (option.selected) {
-                optionElement.style.display = '';
+                optionElement.style.display = 'block';
             } else {
                 optionElement.style.display = 'none';
             }
@@ -64,7 +178,7 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
             if (option.selected) {
                 optionElement.style.display = 'none';
             } else {
-                optionElement.style.display = '';
+                optionElement.style.display = 'block';
             }
         }
         return optionElement;
@@ -73,60 +187,59 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     /**
      * get the options and duplicates these for the add and remove fields
      * @param option
-     * @param selectElement
+     * @param wrapper
      */
-    var duplicatesOptions = function duplicatesOptions(option, selectElement) {
-        var selectFields = selectElement.querySelectorAll('.' + boxesClassName);
+    var duplicatesOptions = function duplicatesOptions(option, wrapper) {
+        var selectFields = wrapper.querySelectorAll('.' + boxesClassName);
         if (selectFields.length === 2) {
-            var addedOption = createSelectOption(option, 1);
-            var removedOption = createSelectOption(option, 0);
+            var addedOption = createSelectOption(option, 1, selectFields[1]);
+            var removedOption = createSelectOption(option, 0, selectFields[0]);
             selectFields[0].appendChild(removedOption);
             selectFields[1].appendChild(addedOption);
         }
     };
 
     /**
-     * @param selectField
-     * @param selectElement
+     * @param select
+     * @param wrapper
      */
-    var setSelectOption = function setSelectOption(selectField, selectElement) {
-        var options = selectField.querySelectorAll('option');
+    var setSelectOption = function setSelectOption(select, wrapper) {
+        var options = select.querySelectorAll('option');
         options.forEach(function (option) {
-            duplicatesOptions(option, selectElement, selectField);
+            duplicatesOptions(option, wrapper);
         });
     };
 
     /**
-     * add the cklickevent to the options to select the option in the original select and hide or show the selection
-     * @param e
-     * @param selectfield
-     * @param selectElement
+     * add the clickevent to the options to select the option in the original select and hide or show the selection
+     * @param theTarget
+     * @param select
+     * @param wrapper
      */
-    var addClickEventToOption = function addClickEventToOption(e, selectfield, selectElement) {
-        var theTarget = e.target;
+    var addClickEventToOption = function addClickEventToOption(theTarget, select, wrapper) {
         var selectedDataSet = theTarget.dataset;
         if (theTarget.className === optionClassName && selectedDataSet.direction && selectedDataSet.index) {
             var selectedIndex = selectedDataSet.index;
-            var selectOptions = selectfield.querySelectorAll('option');
+            var selectOptions = select.querySelectorAll('option');
             theTarget.style.display = 'none';
             if (selectedDataSet.direction === 'add') {
-                selectElement.querySelector('[data-direction="remove"][data-index="' + selectedIndex + '"]').style.display = '';
+                wrapper.querySelector('[data-direction="remove"][data-index="' + selectedIndex + '"]').style.display = 'block';
                 selectOptions[selectedIndex].selected = false;
             } else {
-                selectElement.querySelector('[data-direction="add"][data-index="' + selectedIndex + '"]').style.display = '';
+                wrapper.querySelector('[data-direction="add"][data-index="' + selectedIndex + '"]').style.display = 'block';
                 selectOptions[selectedIndex].selected = true;
             }
 
             // start the counter Event
             if (!options.hideCounter) {
-                calcCounter(selectfield, selectElement);
+                calcCounter(select, wrapper);
             }
         }
     };
 
-    var calcCounter = function calcCounter(selectfield, selectElement) {
-        var selectedItemsCount = selectfield.querySelectorAll('option:checked');
-        selectElement.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
+    var calcCounter = function calcCounter(select, wrapper) {
+        var selectedItemsCount = select.querySelectorAll('option:checked');
+        wrapper.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
     };
 
     /**
@@ -143,17 +256,17 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     /**
      * Filters the options by the input
      * @param input
-     * @param sideBoxes
+     * @param wrapper
      */
-    var filterFunc = function filterFunc(input, sideBoxes) {
-        var filterItems = sideBoxes.querySelectorAll('[data-direction="remove"]');
+    var filterFunc = function filterFunc(input, wrapper) {
+        var filterItems = wrapper.querySelectorAll('[data-direction="remove"]');
         var filter = input.value.toUpperCase();
 
         // Loop through all list items, and hide those who don't match the filter query
         filterItems.forEach(function (filterItem) {
             var txtValue = filterItem.textContent || filterItem.innerText;
             if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                filterItem.style.display = '';
+                filterItem.style.display = 'block';
             } else {
                 filterItem.style.display = 'none';
             }
@@ -162,14 +275,14 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
 
     /**
      * reset the created options to the selected options
-     * @param selectfield
-     * @param selectElement
+     * @param select
+     * @param wrapper
      */
-    var resetToSelectOptions = function resetToSelectOptions(selectfield, selectElement) {
-        var selectedItemsCount = selectfield.querySelectorAll('option');
+    var resetToSelectOptions = function resetToSelectOptions(select, wrapper) {
+        var selectedItemsCount = select.querySelectorAll('option');
         selectedItemsCount.forEach(function (option) {
-            var addOption = selectElement.querySelector('[data-direction="add"][data-index="' + option.index + '"]');
-            var removeOption = selectElement.querySelector('[data-direction="remove"][data-index="' + option.index + '"]');
+            var addOption = wrapper.querySelector('[data-direction="add"][data-index="' + option.index + '"]');
+            var removeOption = wrapper.querySelector('[data-direction="remove"][data-index="' + option.index + '"]');
             if (option.selected) {
                 addOption.style.display = 'block';
                 removeOption.style.display = 'none';
@@ -181,23 +294,24 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     };
 
     /**
-     * create the filter with eventlistener and prepend it to the sideboxes
-     * @param sideBoxes
+     * create the filter with eventlistener and prepend it to the wrapper
+     * @param select
+     * @param wrapper
      * @returns {*}
      */
-    var addFilterInput = function addFilterInput(select, sideBoxes) {
+    var addFilterInput = function addFilterInput(select, wrapper) {
         var filterfield = document.createElement('input');
         filterfield.setAttribute('type', 'text');
         filterfield.setAttribute('placeholder', labelFilter);
         filterfield.classList.add(filterClassName);
         filterfield.addEventListener('keyup', function () {
-            filterFunc(this, sideBoxes);
+            filterFunc(this, wrapper);
             if (this.value === '') {
-                resetToSelectOptions(select, sideBoxes);
+                resetToSelectOptions(select, wrapper);
             }
         });
-        sideBoxes.parentNode.insertBefore(filterfield, sideBoxes);
-        return sideBoxes;
+        wrapper.parentNode.insertBefore(filterfield, wrapper);
+        return wrapper;
     };
 
     /**
@@ -229,21 +343,21 @@ var SideBySideMultiselect = function SideBySideMultiselect(options) {
     selectElements.forEach(function (select) {
         select.style.display = 'none';
         if (checkIfMultiple(select)) {
-            var selectElement = createSideBySideMultiSelectBoxes(select);
-            setSelectOption(select, selectElement);
+            var wrapper = createSideBySideMultiSelectBoxes(select);
+            setSelectOption(select, wrapper);
 
             if (!options.hidefilter) {
-                selectElement = addFilterInput(select, selectElement);
+                wrapper = addFilterInput(select, wrapper);
             }
 
             if (!options.hideCounter) {
                 var counterBox = addCounter();
-                selectElement.appendChild(counterBox);
-                calcCounter(select, selectElement);
+                wrapper.appendChild(counterBox);
+                calcCounter(select, wrapper);
             }
 
-            selectElement.addEventListener('click', function (e) {
-                addClickEventToOption(e, select, selectElement);
+            wrapper.addEventListener('click', function (e) {
+                addClickEventToOption(e.target, select, wrapper);
             });
         }
     });

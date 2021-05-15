@@ -17,24 +17,137 @@ let SideBySideMultiselect = (options) => {
     let labelFilter = (labels && labels.filter) ? labels.filter : 'Filter';
     let labelSelected = (labels && labels.selected) ? labels.selected : 'Selected: ';
 
+
     /**
-     * create the multiselect wrapper with the eompty inner boxes
-     * @param selectField
+     * get the next sibling with given parameter
+     * @param elem
+     * @param selector
+     * @returns {Element}
+     */
+    const getNextSibling = (elem, selector) => {
+        let sibling = elem.nextElementSibling;
+        if (!selector) {
+            return sibling;
+        }
+        while (sibling) {
+            if (sibling.matches(selector)) {
+                return sibling;
+            }
+            sibling = sibling.nextElementSibling;
+        }
+    };
+
+    /**
+     * get the previous sibling with given parameter
+     * @param elem
+     * @param selector
+     * @returns {Element}
+     */
+    const getPreviousSibling = (elem, selector) => {
+        let sibling = elem.previousElementSibling;
+        if (!selector) {
+            return sibling;
+        }
+        while (sibling) {
+            if (sibling.matches(selector)) {
+                return sibling;
+            }
+            sibling = sibling.previousElementSibling;
+        }
+    };
+
+    /**
+     * select on first focus the first visible element
+     * after press arrow up jumps the focus to the previous sibling
+     * after press arrow down jumps the focus to the next sibling
+     * @param e
+     * @param singleBox
+     */
+    const setKeyboardUpAndDownSelect = (e, singleBox) => {
+        e.preventDefault();
+        let activeElement = document.activeElement;
+        let nextSiblingOption = getNextSibling(activeElement, ':not([style="display: none;"]');
+        let previousSiblingOption = getPreviousSibling(activeElement, ':not([style="display: none;"]');
+        if (activeElement.classList.contains(boxesClassName)) {
+            let firstSingleBoxOption = singleBox.querySelector('.' + optionClassName + ':not([style="display: none;"])');
+            if (firstSingleBoxOption) {
+                firstSingleBoxOption.focus();
+            }
+        } else {
+            if (e.key === 'ArrowUp') {
+                if (typeof previousSiblingOption !== 'undefined') {
+                    previousSiblingOption.focus();
+                }
+            } else if (e.key === 'ArrowDown') {
+                if (typeof nextSiblingOption !== 'undefined') {
+                    nextSiblingOption.focus();
+                }
+            }
+        }
+    };
+
+    /**
+     * select the focused element and set the focus to the next or prev
+     * @param e
+     * @param select
+     * @param wrapper
+     */
+    const selectOptionViaKeyboard = (e, select, wrapper) => {
+        e.preventDefault();
+        let activeElement = document.activeElement;
+        let nextSiblingOption = getNextSibling(activeElement, ':not([style="display: none;"]');
+        let previousSiblingOption = getPreviousSibling(activeElement, ':not([style="display: none;"]');
+        if (typeof nextSiblingOption !== 'undefined') {
+            nextSiblingOption.focus();
+        } else if (typeof previousSiblingOption !== 'undefined') {
+            previousSiblingOption.focus();
+        } else {
+            activeElement.parentNode.focus();
+        }
+        if (typeof previousSiblingOption !== 'undefined') {
+            previousSiblingOption.focus();
+        }
+        addClickEventToOption(activeElement, select, wrapper);
+    };
+
+    /**
+     * create a single box for the options
+     * @param wrapper
+     * @param select
      * @returns {HTMLDivElement}
      */
-    const createSideBySideMultiSelectBoxes = (selectField) => {
+    const createSingleBox = (wrapper, select) => {
+        const singleBox = document.createElement('div');
+        singleBox.setAttribute('role', 'listbox');
+        singleBox.setAttribute('aria-expanded', 'true');
+        singleBox.setAttribute('tabindex', '0');
+        singleBox.classList.add(boxesClassName);
+        singleBox.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp' ) {
+                setKeyboardUpAndDownSelect(e, singleBox);
+            } else if (e.key === ' ') {
+                selectOptionViaKeyboard(e, select, wrapper);
+            }
+        });
+        return singleBox;
+    };
+
+    /**
+     * create the multiselect wrapper with the eompty inner boxes
+     * @param select
+     * @returns {HTMLDivElement}
+     */
+    const createSideBySideMultiSelectBoxes = (select) => {
         const wrapper = document.createElement('div');
         wrapper.classList.add(wrapperClassName);
 
-        const leftBox = document.createElement('div');
-        leftBox.classList.add(boxesClassName);
+        const leftBox = createSingleBox(wrapper, select);
         wrapper.appendChild(leftBox);
 
-        const rightBox = document.createElement('div');
-        rightBox.classList.add(boxesClassName);
+        const rightBox = createSingleBox(wrapper, select);
         wrapper.appendChild(rightBox);
 
-        selectField.parentNode.insertBefore(wrapper, selectField.nextSibling);
+        select.parentNode.insertBefore(wrapper, select.nextSibling);
         return wrapper;
     };
 
@@ -45,15 +158,17 @@ let SideBySideMultiselect = (options) => {
      * @returns {HTMLDivElement}
      */
     const createSelectOption = (option, direction) => {
-        const optionElement = document.createElement('div');
+        let optionElement = document.createElement('div');
         optionElement.innerHTML = option.text;
+        optionElement.setAttribute('role', 'option');
+        optionElement.setAttribute('tabindex', '-1');
         optionElement.classList.add(optionClassName);
         optionElement.setAttribute('data-index', option.index);
 
         if (direction === 1) {
             optionElement.setAttribute('data-direction', 'add');
             if(option.selected) {
-                optionElement.style.display = '';
+                optionElement.style.display = 'block';
             } else {
                 optionElement.style.display = 'none';
             }
@@ -62,7 +177,7 @@ let SideBySideMultiselect = (options) => {
             if(option.selected) {
                 optionElement.style.display = 'none';
             } else {
-                optionElement.style.display = '';
+                optionElement.style.display = 'block';
             }
         }
         return optionElement;
@@ -71,60 +186,59 @@ let SideBySideMultiselect = (options) => {
     /**
      * get the options and duplicates these for the add and remove fields
      * @param option
-     * @param selectElement
+     * @param wrapper
      */
-    const duplicatesOptions = (option, selectElement) => {
-        let selectFields = selectElement.querySelectorAll('.' + boxesClassName);
+    const duplicatesOptions = (option, wrapper) => {
+        let selectFields = wrapper.querySelectorAll('.' + boxesClassName);
         if (selectFields.length === 2) {
-            let addedOption = createSelectOption(option, 1);
-            let removedOption = createSelectOption(option, 0);
+            let addedOption = createSelectOption(option, 1, selectFields[1]);
+            let removedOption = createSelectOption(option, 0, selectFields[0]);
             selectFields[0].appendChild(removedOption);
             selectFields[1].appendChild(addedOption);
         }
     };
 
     /**
-     * @param selectField
-     * @param selectElement
+     * @param select
+     * @param wrapper
      */
-    const setSelectOption = (selectField, selectElement) => {
-        let options = selectField.querySelectorAll('option');
+    const setSelectOption = (select, wrapper) => {
+        let options = select.querySelectorAll('option');
         options.forEach(function(option) {
-            duplicatesOptions(option, selectElement, selectField);
+            duplicatesOptions(option, wrapper);
         });
     };
 
     /**
-     * add the cklickevent to the options to select the option in the original select and hide or show the selection
-     * @param e
-     * @param selectfield
-     * @param selectElement
+     * add the clickevent to the options to select the option in the original select and hide or show the selection
+     * @param theTarget
+     * @param select
+     * @param wrapper
      */
-    const addClickEventToOption = (e, selectfield, selectElement) => {
-        let theTarget = e.target;
+    const addClickEventToOption = (theTarget, select, wrapper) => {
         let selectedDataSet = theTarget.dataset;
         if (theTarget.className === optionClassName && selectedDataSet.direction && selectedDataSet.index) {
             let selectedIndex = selectedDataSet.index;
-            let selectOptions = selectfield.querySelectorAll('option');
+            let selectOptions = select.querySelectorAll('option');
             theTarget.style.display = 'none';
             if (selectedDataSet.direction === 'add') {
-                selectElement.querySelector('[data-direction="remove"][data-index="' + selectedIndex + '"]').style.display = '';
+                wrapper.querySelector('[data-direction="remove"][data-index="' + selectedIndex + '"]').style.display = 'block';
                 selectOptions[selectedIndex].selected = false;
             } else {
-                selectElement.querySelector('[data-direction="add"][data-index="' + selectedIndex + '"]').style.display = '';
+                wrapper.querySelector('[data-direction="add"][data-index="' + selectedIndex + '"]').style.display = 'block';
                 selectOptions[selectedIndex].selected = true;
             }
 
             // start the counter Event
             if (!options.hideCounter) {
-                calcCounter(selectfield, selectElement);
+                calcCounter(select, wrapper);
             }
         }
     };
 
-    const calcCounter = (selectfield, selectElement) => {
-        let selectedItemsCount = selectfield.querySelectorAll('option:checked');
-        selectElement.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
+    const calcCounter = (select, wrapper) => {
+        let selectedItemsCount = select.querySelectorAll('option:checked');
+        wrapper.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
     };
 
     /**
@@ -141,17 +255,17 @@ let SideBySideMultiselect = (options) => {
     /**
      * Filters the options by the input
      * @param input
-     * @param sideBoxes
+     * @param wrapper
      */
-    const filterFunc = (input, sideBoxes) => {
-        let filterItems = sideBoxes.querySelectorAll('[data-direction="remove"]');
+    const filterFunc = (input, wrapper) => {
+        let filterItems = wrapper.querySelectorAll('[data-direction="remove"]');
         let filter = input.value.toUpperCase();
 
         // Loop through all list items, and hide those who don't match the filter query
         filterItems.forEach(function(filterItem) {
             let txtValue = filterItem.textContent || filterItem.innerText;
             if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                filterItem.style.display = '';
+                filterItem.style.display = 'block';
             } else {
                 filterItem.style.display = 'none';
             }
@@ -160,14 +274,14 @@ let SideBySideMultiselect = (options) => {
 
     /**
      * reset the created options to the selected options
-     * @param selectfield
-     * @param selectElement
+     * @param select
+     * @param wrapper
      */
-    const resetToSelectOptions = (selectfield, selectElement) => {
-        let selectedItemsCount = selectfield.querySelectorAll('option');
+    const resetToSelectOptions = (select, wrapper) => {
+        let selectedItemsCount = select.querySelectorAll('option');
         selectedItemsCount.forEach(function(option) {
-            let addOption = selectElement.querySelector('[data-direction="add"][data-index="' + option.index + '"]');
-            let removeOption = selectElement.querySelector('[data-direction="remove"][data-index="' + option.index + '"]');
+            let addOption = wrapper.querySelector('[data-direction="add"][data-index="' + option.index + '"]');
+            let removeOption = wrapper.querySelector('[data-direction="remove"][data-index="' + option.index + '"]');
             if (option.selected) {
                 addOption.style.display = 'block';
                 removeOption.style.display = 'none';
@@ -179,23 +293,24 @@ let SideBySideMultiselect = (options) => {
     };
 
     /**
-     * create the filter with eventlistener and prepend it to the sideboxes
-     * @param sideBoxes
+     * create the filter with eventlistener and prepend it to the wrapper
+     * @param select
+     * @param wrapper
      * @returns {*}
      */
-    const addFilterInput = (select, sideBoxes) => {
+    const addFilterInput = (select, wrapper) => {
         let filterfield = document.createElement('input');
         filterfield.setAttribute('type', 'text');
         filterfield.setAttribute('placeholder', labelFilter);
         filterfield.classList.add(filterClassName);
         filterfield.addEventListener('keyup', function() {
-            filterFunc(this, sideBoxes);
+            filterFunc(this, wrapper);
             if (this.value === '') {
-                resetToSelectOptions(select, sideBoxes);
+                resetToSelectOptions(select, wrapper);
             }
         });
-        sideBoxes.parentNode.insertBefore(filterfield, sideBoxes);
-        return sideBoxes;
+            wrapper.parentNode.insertBefore(filterfield, wrapper);
+        return wrapper;
     };
 
     /**
@@ -227,21 +342,21 @@ let SideBySideMultiselect = (options) => {
     selectElements.forEach(function(select) {
         select.style.display = 'none';
         if (checkIfMultiple(select)) {
-            let selectElement = createSideBySideMultiSelectBoxes(select);
-            setSelectOption(select, selectElement);
+            let wrapper = createSideBySideMultiSelectBoxes(select);
+            setSelectOption(select, wrapper);
 
             if (!options.hidefilter) {
-                selectElement = addFilterInput(select, selectElement);
+                wrapper = addFilterInput(select, wrapper);
             }
 
             if (!options.hideCounter) {
                 let counterBox = addCounter();
-                selectElement.appendChild(counterBox);
-                calcCounter(select, selectElement);
+                wrapper.appendChild(counterBox);
+                calcCounter(select, wrapper);
             }
 
-            selectElement.addEventListener('click', function(e) {
-                addClickEventToOption(e, select, selectElement);
+            wrapper.addEventListener('click', function(e) {
+                addClickEventToOption(e.target, select, wrapper);
             });
         }
     });
