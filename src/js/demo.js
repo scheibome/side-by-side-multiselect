@@ -1,4 +1,4 @@
-import SideBySideMultiselect from './side-by-side-multiselect.js';
+import SideBySideMultiselect from './side-by-side-multiselect.min.js';
 
 window.onload = function() {
     SideBySideMultiselect();

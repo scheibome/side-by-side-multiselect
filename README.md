@@ -36,7 +36,7 @@ You can check the live demo [right here](https://scheibome.github.io/side-by-sid
     <option value="Ruby" name="Ruby">Ruby</option>
 </select>
 
-<script src="side-by-side-multiselect.min.js"></script>
+<script src="side-by-side-multiselect.umd.min.js"></script>
 <script type="text/javascript">
     SideBySideMultiselect();
 </script>
@@ -58,7 +58,7 @@ You can check the live demo [right here](https://scheibome.github.io/side-by-sid
     <option value="script" name="script">Script</option>
 </select>
 
-<script src="side-by-side-multiselect.min.js"></script>
+<script src="side-by-side-multiselect.umd.min.js"></script>
 <script type="text/javascript">
     SideBySideMultiselect({
         'selector': '.myselectfield',
