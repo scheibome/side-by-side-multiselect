@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.3.0
+
+- [FEATURE] add umd and es format
+- [TASK] add .npmignore
+- [TASK] add new version of babel
+
 ## 1.2.0
 
 - [FEATURE] add label to filter input and add placeholder optional
