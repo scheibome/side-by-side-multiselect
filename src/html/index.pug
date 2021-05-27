@@ -57,11 +57,4 @@ html(lang='en')
                     option(value='jquery' name='jquery') jQuery
                     option(value='script' name='script') Script
                 button.btn.btn-primary(type='submit') Submit
-            script(src='side-by-side-multiselect.min.js')
-            script(type='text/javascript').
-                SideBySideMultiselect();
-                SideBySideMultiselect({
-                    'selector': '.js-sidebysidemultiselectdemo2',
-                    'hidefilter': true,
-                    'hideCounter': true,
-                });
+            script(type="module" src="./demo.js")

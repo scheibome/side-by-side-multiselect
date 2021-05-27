@@ -1,4 +1,4 @@
-let SideBySideMultiselect = (options) => {
+export default function SideBySideMultiselect(options) {
 
     if (typeof options === 'undefined') {
         options = '';

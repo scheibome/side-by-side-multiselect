@@ -1,13 +1,17 @@
-Side by side select for multiselect
-===================================
+SideBySideMultiSelect
+=====================
 
-**javascript** multiselectboxes with filters for `select` html tag
+Is a **javascript** multiselectbox with filters for `select` html tag
 
 ## Live Demo
 
 You can check the live demo [right here](https://scheibome.github.io/side-by-side-multiselect/)
 
 ![Side by side select for multiselect demo](src/images/demo.gif)
+
+## Usage:
+
+**On npm**: `side-by-side-multiselect`
 
 ## Style setup in css
 
@@ -98,6 +102,39 @@ SideBySideMultiselect({
 | classSettings | object | `See options example` | Name of the skin, it will add a class to the lightbox so you can style it with css. |
 | hideCounter | boolean | `false` | Hide the counter |
 | labels | object | `See options example` | The label content  |
+
+## Including SideBySideMultiSelect
+
+SideBySideMultiSelect is distributed as an ES6 module, but there is also a UMD module included.
+How to install
+
+```npm i side-by-side-multiselect```
+
+### Example with vanilla js
+This is what I used in the demo. Checkout index.html and demo.js.
+
+```js
+import SideBySideMultiselect from './side-by-side-multiselect.js';
+
+window.onload = function() {
+    SideBySideMultiselect({
+        'selector': '.js-sidebysidemultiselectdemo2',
+        'hidefilter': true,
+        'hideCounter': true,
+    });
+}
+```
+
+Include in your html. Notice the `type` attribute:
+```html
+<script src="./demo.js" type="module"></script>
+```
+
+To support IE and legacy browsers, use the `nomodule` script tag to include separate scripts that don't use the module syntax:
+
+```html
+<script nomodule src="js/side-by-side-multiselect.umd.js"></script>
+```
 
 Author
 ------
