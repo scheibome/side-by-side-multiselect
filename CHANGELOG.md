@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.3.1
+
+- [TASK] add minify files
+
 ## 1.3.0
 
 - [FEATURE] add umd and es format
