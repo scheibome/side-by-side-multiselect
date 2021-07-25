@@ -9,7 +9,7 @@ window.onload = function() {
     });
     SideBySideMultiselect({
         'selector': '.js-sidebysidemultiselectdemo3',
-        'moveOption': true
+        'orderOption': true
     });
 };
 

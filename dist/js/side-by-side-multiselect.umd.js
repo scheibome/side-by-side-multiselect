@@ -12,6 +12,7 @@
       var selectElements = options.selector ? document.querySelectorAll(options.selector) : document.querySelectorAll('.js-sidebysidemultiselect');
       var classSettings = options.classSettings;
       var wrapperClassName = classSettings && classSettings.wrapperclass ? classSettings.wrapperclass : 'side-by-side-multiselect';
+      var orderBoxClassName = classSettings && classSettings.wrapperclass ? classSettings.wrapperclass : 'side-by-side-multiselect__order';
       var optionClassName = classSettings && classSettings.optionclass ? classSettings.optionclass : 'side-by-side-multiselect__option';
       var selectedOptionClassName = classSettings && classSettings.optionclass ? classSettings.optionclass : 'side-by-side-multiselect__option--selected';
       var boxesClassName = classSettings && classSettings.boxesclass ? classSettings.boxesclass : 'side-by-side-multiselect__inner';
@@ -21,8 +22,9 @@
       var counterClassName = classSettings && classSettings.counterclass ? classSettings.counterclass : 'side-by-side-multiselect__counter';
       var labelClassName = classSettings && classSettings.labelclass ? classSettings.labelclass : 'side-by-side-multiselectlabel';
       var errorText = 'Error, the select must been a multible select';
-      var moveOptionsFieldPrefix = '-move';
-      var moveOptionsValueSplitter = ';';
+      var orderOptionsFieldPrefix = '-order';
+      var orderClassnamePrefix = '--order';
+      var orderOptionsValueSplitter = ';';
       var labels = options.labels;
       var labelFilter = labels && labels.filter ? labels.filter : 'Filter';
       var labelSelected = labels && labels.selected ? labels.selected : 'Selected: ';
@@ -45,7 +47,6 @@
         }
 
         arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
-        console.log(1627215883895, arr);
         return arr; // for testing purposes
       };
       /**
@@ -146,8 +147,8 @@
        */
 
 
-      var getmoveOptionField = function getmoveOptionField(select) {
-        return document.getElementById(select.id + moveOptionsFieldPrefix);
+      var getOrderOptionField = function getOrderOptionField(select) {
+        return document.getElementById(select.id + orderOptionsFieldPrefix);
       };
       /**
        * returns the value of the ordered input field as array
@@ -159,7 +160,7 @@
 
 
       var getOrderedOptions = function getOrderedOptions(input) {
-        var array = input.value.trim().split(moveOptionsValueSplitter);
+        var array = input.value.trim().split(orderOptionsValueSplitter);
         array = array.filter(function (value) {
           return Object.keys(value).length !== 0;
         });
@@ -177,8 +178,8 @@
       var calcCounter = function calcCounter(select, wrapper) {
         var selectedItemsCount;
 
-        if (options.moveOption) {
-          var inputField = getmoveOptionField(select);
+        if (options.orderOption) {
+          var inputField = getOrderOptionField(select);
           selectedItemsCount = getOrderedOptions(inputField);
         } else {
           selectedItemsCount = select.querySelectorAll('option:checked');
@@ -224,11 +225,10 @@
        * @param theTarget
        * @param select
        * @param wrapper
-       * @param moveOption
        */
 
 
-      var addClickEventToOption = function addClickEventToOption(theTarget, select, wrapper, moveOption) {
+      var addClickEventToOption = function addClickEventToOption(theTarget, select, wrapper) {
         var selectedDataSet = theTarget.dataset;
 
         if (theTarget.className === optionClassName && selectedDataSet.direction && selectedDataSet.index) {
@@ -237,9 +237,10 @@
           var selectOptions = select.querySelectorAll('option');
           var orderedOptions;
           var moveOptionField;
+          var moveOption = options.orderOption;
 
           if (moveOption) {
-            moveOptionField = getmoveOptionField(select);
+            moveOptionField = getOrderOptionField(select);
             orderedOptions = moveOptionField.value.trim();
           }
 
@@ -260,7 +261,7 @@
             theTarget.style.display = 'none';
 
             if (moveOption) {
-              moveOptionField.value = orderedOptions + ' ' + selectedValue + moveOptionsValueSplitter;
+              moveOptionField.value = orderedOptions + ' ' + selectedValue + orderOptionsValueSplitter;
               rearrangeSelectedOptions(select, wrapper, moveOptionField);
             }
           } // start the counter Event
@@ -276,11 +277,10 @@
        * @param e
        * @param select
        * @param wrapper
-       * @param moveOption
        */
 
 
-      var selectOptionViaKeyboard = function selectOptionViaKeyboard(e, select, wrapper, moveOption) {
+      var selectOptionViaKeyboard = function selectOptionViaKeyboard(e, select, wrapper) {
         e.preventDefault();
         var activeElement = document.activeElement;
         var nextSiblingOption = getNextSibling(activeElement, ':not([style="display: none;"]');
@@ -298,18 +298,17 @@
           previousSiblingOption.focus();
         }
 
-        addClickEventToOption(activeElement, select, wrapper, moveOption);
+        addClickEventToOption(activeElement, select, wrapper);
       };
       /**
        * create a single box for the options
        * @param wrapper
        * @param select
-       * @param moveOption
        * @returns {HTMLDivElement}
        */
 
 
-      var createSingleBox = function createSingleBox(wrapper, select, moveOption) {
+      var createSingleBox = function createSingleBox(wrapper, select) {
         var singleBox = document.createElement('div');
         singleBox.setAttribute('role', 'listbox');
         singleBox.setAttribute('aria-expanded', 'true');
@@ -319,7 +318,7 @@
           if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
             setKeyboardUpAndDownSelect(e, singleBox);
           } else if (e.key === ' ' || e.key === 'Enter') {
-            selectOptionViaKeyboard(e, select, wrapper, moveOption);
+            selectOptionViaKeyboard(e, select, wrapper);
           }
         });
         return singleBox;
@@ -327,18 +326,23 @@
       /**
        * create the multiselect wrapper with the eompty inner boxes
        * @param select
-       * @param moveOption
        * @returns {HTMLDivElement}
        */
 
 
-      var createSideBySideMultiSelectBoxes = function createSideBySideMultiSelectBoxes(select, moveOption) {
+      var createSideBySideMultiSelectBoxes = function createSideBySideMultiSelectBoxes(select) {
         var wrapper = document.createElement('div');
+        options.orderOption;
         wrapper.classList.add(wrapperClassName);
-        var leftBox = createSingleBox(wrapper, select, moveOption);
+
+        if (options.orderOption) {
+          wrapper.classList.add(wrapperClassName + orderClassnamePrefix);
+        }
+
+        var leftBox = createSingleBox(wrapper, select);
         leftBox.setAttribute('data-boxdirection', 'remove');
         wrapper.appendChild(leftBox);
-        var rightBox = createSingleBox(wrapper, select, moveOption);
+        var rightBox = createSingleBox(wrapper, select);
         rightBox.setAttribute('data-boxdirection', 'add');
         wrapper.appendChild(rightBox);
         select.parentNode.insertBefore(wrapper, select.nextSibling);
@@ -395,10 +399,10 @@
 
       var createMoveOptionsField = function createMoveOptionsField(select, wrapper) {
         var moveOptionField = document.createElement('input');
-        moveOptionField.id = select.id + moveOptionsFieldPrefix;
-        moveOptionField.name = select.name.replace('[]', '') + moveOptionsFieldPrefix;
-        moveOptionField.value = select.dataset.selecteditems; // moveOptionField.style.display = 'none'; // TODO ENABLE
-
+        moveOptionField.id = select.id + orderOptionsFieldPrefix;
+        moveOptionField.name = select.name.replace('[]', '') + orderOptionsFieldPrefix;
+        moveOptionField.value = select.dataset.selecteditems;
+        moveOptionField.style.display = 'none';
         wrapper.appendChild(moveOptionField);
         console.log(1627218185086, wrapper);
         return moveOptionField;
@@ -440,7 +444,7 @@
       var addTriggerEventToButton = function addTriggerEventToButton(button, select, wrapper, position) {
         button.addEventListener('click', function (e) {
           e.preventDefault();
-          var inputField = getmoveOptionField(select);
+          var inputField = getOrderOptionField(select);
           var selectedItem = inputField.dataset.selected;
           var activeItemsArray = getOrderedOptions(inputField);
           var index = activeItemsArray.findIndex(function (items) {
@@ -488,7 +492,7 @@
           }
 
           activeItemsArray.forEach(function (activeItem) {
-            newValue = newValue + activeItem + moveOptionsValueSplitter;
+            newValue = newValue + activeItem + orderOptionsValueSplitter;
           });
           inputField.value = newValue;
           rearrangeSelectedOptions(select, wrapper, inputField);
@@ -499,33 +503,37 @@
         });
       };
 
-      var createMoveButton = function createMoveButton(text) {
+      var createOrderButton = function createOrderButton(text) {
         var button = document.createElement('button');
         button.innerText = text;
         return button;
       };
 
-      var addMoveOptionBox = function addMoveOptionBox(select, wrapper) {
-        // toTop Button
-        var toTopButton = createMoveButton('to top');
+      var addOrderOptionBox = function addOrderOptionBox(select, wrapper) {
+        var orderBox = document.createElement('div');
+        var removeSelectBox = wrapper.querySelector('[data-boxdirection="remove"]');
+        orderBox.classList.add(orderBoxClassName); // toTop Button
+
+        var toTopButton = createOrderButton('to top');
         addTriggerEventToButton(toTopButton, select, wrapper, 0);
-        wrapper.appendChild(toTopButton); // up Button
+        orderBox.appendChild(toTopButton); // up Button
 
-        var upButton = createMoveButton('up');
+        var upButton = createOrderButton('up');
         addTriggerEventToButton(upButton, select, wrapper, -1);
-        wrapper.appendChild(upButton); // down Button
+        orderBox.appendChild(upButton); // down Button
 
-        var downButton = createMoveButton('down');
+        var downButton = createOrderButton('down');
         addTriggerEventToButton(downButton, select, wrapper, 1);
-        wrapper.appendChild(downButton); // toTheBottom Button
+        orderBox.appendChild(downButton); // toTheBottom Button
 
-        var toTheBottom = createMoveButton('to the bottom');
+        var toTheBottom = createOrderButton('to the bottom');
         addTriggerEventToButton(toTheBottom, select, wrapper, 'last');
-        wrapper.appendChild(toTheBottom); // remove Button
+        orderBox.appendChild(toTheBottom); // remove Button
 
-        var remove = createMoveButton('remove');
+        var remove = createOrderButton('remove');
         addTriggerEventToButton(remove, select, wrapper, 'remove');
-        wrapper.appendChild(remove);
+        orderBox.appendChild(remove);
+        removeSelectBox.after(orderBox);
       };
       /**
        * Filters the options by the input
@@ -581,7 +589,12 @@
       var createFilter = function createFilter(select, wrapper) {
         // FilterWrapper
         var filterWrapper = document.createElement('div');
-        filterWrapper.classList.add(filterWrapperClassName); // FilterLabel
+        filterWrapper.classList.add(filterWrapperClassName);
+
+        if (options.orderOption) {
+          filterWrapper.classList.add(filterWrapperClassName + orderClassnamePrefix);
+        } // FilterLabel
+
 
         var filterLabel = document.createElement('label');
         filterLabel.innerText = labelFilter;
@@ -673,10 +686,10 @@
 
       selectElements.forEach(function (select) {
         if (checkIfMultiple(select)) {
-          var moveOption = options.moveOption;
+          var orderOption = options.orderOption;
           select.style.display = 'none';
           findLabelOfSelectAndSetBlock(select);
-          var wrapper = createSideBySideMultiSelectBoxes(select, moveOption);
+          var wrapper = createSideBySideMultiSelectBoxes(select);
           setSelectOption(select, wrapper);
           resetToSelectOptions(select, wrapper);
 
@@ -684,11 +697,11 @@
             wrapper = addFilterInput(select, wrapper);
           }
 
-          if (moveOption) {
+          if (orderOption) {
             var rearrangeOptionField = createMoveOptionsField(select, wrapper);
             rearrangeSelectedOptions(select, wrapper, rearrangeOptionField);
             resetToSelectOptions(select, wrapper);
-            addMoveOptionBox(select, wrapper); // TODO
+            addOrderOptionBox(select, wrapper); // TODO
           }
 
           if (!options.hideCounter) {
@@ -698,7 +711,7 @@
           }
 
           wrapper.addEventListener('click', function (e) {
-            addClickEventToOption(e.target, select, wrapper, moveOption);
+            addClickEventToOption(e.target, select, wrapper);
           });
         }
       });

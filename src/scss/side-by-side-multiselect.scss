@@ -11,6 +11,10 @@
     position:relative;
     width: calc(50% - 0.5rem);
 
+    &--order {
+      width: calc(50% - 0.5rem - var(--sideBySiteMultiSelectOrderWidth) / 2);
+    }
+
     &__label {
       opacity: 0.6;
       position: absolute;
@@ -63,6 +67,10 @@
     &:focus {
       background-color: var(--sideBySiteMultiSelectSearchFocusBgColor);
     }
+
+    #{$this}--order & {
+      width: calc(50% - 0.5rem - var(--sideBySiteMultiSelectOrderWidth) / 2);
+    }
   }
 
   &__counter {
@@ -83,5 +91,11 @@
       color: var(--sideBySiteMultiSelectHoverTextColor);
       background-color: var(--sideBySiteMultiSelectColor);
     }
+  }
+
+  &__order {
+    display: flex;
+    flex-direction: column;
+    width: var(--sideBySiteMultiSelectOrderWidth);
   }
 }
