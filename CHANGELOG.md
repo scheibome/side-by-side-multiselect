@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.4.0
+
+- [FEATURE] add a manual order option
+
 ## 1.3.1
 
 - [TASK] add minify files
