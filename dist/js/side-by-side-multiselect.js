@@ -14,6 +14,8 @@ function SideBySideMultiselect(options) {
   var counterClassName = classSettings && classSettings.counterclass ? classSettings.counterclass : 'side-by-side-multiselect__counter';
   var labelClassName = classSettings && classSettings.labelclass ? classSettings.labelclass : 'side-by-side-multiselectlabel';
   var errorText = 'Error, the select must been a multible select';
+  var moveOptionsFieldPrefix = '-move';
+  var moveOptionsValueSplitter = ';';
   var labels = options.labels;
   var labelFilter = labels && labels.filter ? labels.filter : 'Filter';
   var labelSelected = labels && labels.selected ? labels.selected : 'Selected: ';
@@ -96,14 +98,74 @@ function SideBySideMultiselect(options) {
     }
   };
   /**
-   * select the focused element and set the focus to the next or prev
-   * @param e
+   * count the selected options and add the number to the html
    * @param select
    * @param wrapper
    */
 
 
-  var selectOptionViaKeyboard = function selectOptionViaKeyboard(e, select, wrapper) {
+  var calcCounter = function calcCounter(select, wrapper) {
+    var selectedItemsCount = select.querySelectorAll('option:checked');
+    wrapper.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
+  };
+  /**
+   * add the clickevent to the options to select the option in the original select and hide or show the selection
+   * @param theTarget
+   * @param select
+   * @param wrapper
+   * @param moveOption
+   */
+
+
+  var addClickEventToOption = function addClickEventToOption(theTarget, select, wrapper, moveOption) {
+    var selectedDataSet = theTarget.dataset;
+
+    if (theTarget.className === optionClassName && selectedDataSet.direction && selectedDataSet.index) {
+      var selectedIndex = selectedDataSet.index;
+      var selectedValue = selectedDataSet.value;
+      var selectOptions = select.querySelectorAll('option');
+      var orderedOptions;
+      var moveOptionField;
+
+      if (moveOption) {
+        moveOptionField = document.getElementById(select.id + moveOptionsFieldPrefix);
+        orderedOptions = moveOptionField.value.trim();
+      }
+
+      if (selectedDataSet.direction === 'add') {
+        // remove the field only if the ordered option is NOT set
+        if (!moveOption) {
+          wrapper.querySelector('[data-direction="remove"][data-index="' + selectedIndex + '"]').style.display = 'block';
+          selectOptions[selectedIndex].selected = false;
+          theTarget.style.display = 'none';
+        }
+      } else {
+        wrapper.querySelector('[data-direction="add"][data-index="' + selectedIndex + '"]').style.display = 'block';
+        selectOptions[selectedIndex].selected = true;
+        theTarget.style.display = 'none';
+
+        if (moveOption) {
+          moveOptionField.value = orderedOptions + ' ' + selectedValue + moveOptionsValueSplitter;
+          rearrangeSelectedOptions(select, wrapper, moveOptionField);
+        }
+      } // start the counter Event
+
+
+      if (!options.hideCounter) {
+        calcCounter(select, wrapper);
+      }
+    }
+  };
+  /**
+   * select the focused element and set the focus to the next or prev
+   * @param e
+   * @param select
+   * @param wrapper
+   * @param moveOption
+   */
+
+
+  var selectOptionViaKeyboard = function selectOptionViaKeyboard(e, select, wrapper, moveOption) {
     e.preventDefault();
     var activeElement = document.activeElement;
     var nextSiblingOption = getNextSibling(activeElement, ':not([style="display: none;"]');
@@ -121,17 +183,18 @@ function SideBySideMultiselect(options) {
       previousSiblingOption.focus();
     }
 
-    addClickEventToOption(activeElement, select, wrapper);
+    addClickEventToOption(activeElement, select, wrapper, moveOption);
   };
   /**
    * create a single box for the options
    * @param wrapper
    * @param select
+   * @param moveOption
    * @returns {HTMLDivElement}
    */
 
 
-  var createSingleBox = function createSingleBox(wrapper, select) {
+  var createSingleBox = function createSingleBox(wrapper, select, moveOption) {
     var singleBox = document.createElement('div');
     singleBox.setAttribute('role', 'listbox');
     singleBox.setAttribute('aria-expanded', 'true');
@@ -141,7 +204,7 @@ function SideBySideMultiselect(options) {
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         setKeyboardUpAndDownSelect(e, singleBox);
       } else if (e.key === ' ' || e.key === 'Enter') {
-        selectOptionViaKeyboard(e, select, wrapper);
+        selectOptionViaKeyboard(e, select, wrapper, moveOption);
       }
     });
     return singleBox;
@@ -149,16 +212,19 @@ function SideBySideMultiselect(options) {
   /**
    * create the multiselect wrapper with the eompty inner boxes
    * @param select
+   * @param moveOption
    * @returns {HTMLDivElement}
    */
 
 
-  var createSideBySideMultiSelectBoxes = function createSideBySideMultiSelectBoxes(select) {
+  var createSideBySideMultiSelectBoxes = function createSideBySideMultiSelectBoxes(select, moveOption) {
     var wrapper = document.createElement('div');
     wrapper.classList.add(wrapperClassName);
-    var leftBox = createSingleBox(wrapper, select);
+    var leftBox = createSingleBox(wrapper, select, moveOption);
+    leftBox.setAttribute('data-boxdirection', 'remove');
     wrapper.appendChild(leftBox);
-    var rightBox = createSingleBox(wrapper, select);
+    var rightBox = createSingleBox(wrapper, select, moveOption);
+    rightBox.setAttribute('data-boxdirection', 'add');
     wrapper.appendChild(rightBox);
     select.parentNode.insertBefore(wrapper, select.nextSibling);
     return wrapper;
@@ -177,6 +243,7 @@ function SideBySideMultiselect(options) {
     optionElement.setAttribute('role', 'option');
     optionElement.setAttribute('tabindex', '-1');
     optionElement.classList.add(optionClassName);
+    optionElement.setAttribute('data-value', option.value);
     optionElement.setAttribute('data-index', option.index);
 
     if (direction === 1) {
@@ -210,11 +277,27 @@ function SideBySideMultiselect(options) {
     var selectFields = wrapper.querySelectorAll('.' + boxesClassName);
 
     if (selectFields.length === 2) {
-      var addedOption = createSelectOption(option, 1, selectFields[1]);
       var removedOption = createSelectOption(option, 0, selectFields[0]);
+      var addedOption = createSelectOption(option, 1, selectFields[1]);
       selectFields[0].appendChild(removedOption);
       selectFields[1].appendChild(addedOption);
     }
+  };
+  /**
+   * add a new input field into the form for the ordered selection
+   * @param select
+   * @param wrapper
+   */
+
+
+  var createMoveOptionsField = function createMoveOptionsField(select, wrapper) {
+    var moveOptionField = document.createElement('input');
+    moveOptionField.id = select.id + moveOptionsFieldPrefix;
+    moveOptionField.name = select.name.replace('[]', '') + moveOptionsFieldPrefix;
+    moveOptionField.value = select.dataset.selecteditems; // moveOptionField.style.display = 'none'; // TODO ENABLE
+
+    wrapper.appendChild(moveOptionField);
+    return moveOptionField;
   };
   /**
    * @param select
@@ -229,41 +312,6 @@ function SideBySideMultiselect(options) {
     });
   };
   /**
-   * add the clickevent to the options to select the option in the original select and hide or show the selection
-   * @param theTarget
-   * @param select
-   * @param wrapper
-   */
-
-
-  var addClickEventToOption = function addClickEventToOption(theTarget, select, wrapper) {
-    var selectedDataSet = theTarget.dataset;
-
-    if (theTarget.className === optionClassName && selectedDataSet.direction && selectedDataSet.index) {
-      var selectedIndex = selectedDataSet.index;
-      var selectOptions = select.querySelectorAll('option');
-      theTarget.style.display = 'none';
-
-      if (selectedDataSet.direction === 'add') {
-        wrapper.querySelector('[data-direction="remove"][data-index="' + selectedIndex + '"]').style.display = 'block';
-        selectOptions[selectedIndex].selected = false;
-      } else {
-        wrapper.querySelector('[data-direction="add"][data-index="' + selectedIndex + '"]').style.display = 'block';
-        selectOptions[selectedIndex].selected = true;
-      } // start the counter Event
-
-
-      if (!options.hideCounter) {
-        calcCounter(select, wrapper);
-      }
-    }
-  };
-
-  var calcCounter = function calcCounter(select, wrapper) {
-    var selectedItemsCount = select.querySelectorAll('option:checked');
-    wrapper.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
-  };
-  /**
    * create the counter div with content
    * @returns {*}
    */
@@ -274,6 +322,17 @@ function SideBySideMultiselect(options) {
     counterBox.innerText = labelSelected;
     counterBox.classList.add(counterClassName);
     return counterBox;
+  };
+
+  var createMoveButton = function createMoveButton() {
+    var button = document.createElement('button');
+    button.innerText = 'up';
+    return button;
+  };
+
+  var addMoveOptionBox = function addMoveOptionBox(wrapper) {
+    var upButton = createMoveButton();
+    wrapper.appendChild(upButton);
   };
   /**
    * Filters the options by the input
@@ -318,6 +377,13 @@ function SideBySideMultiselect(options) {
       }
     });
   };
+  /**
+   * create the filter to filter the options
+   * @param select
+   * @param wrapper
+   * @returns {HTMLDivElement}
+   */
+
 
   var createFilter = function createFilter(select, wrapper) {
     // FilterWrapper
@@ -405,6 +471,29 @@ function SideBySideMultiselect(options) {
     }
   };
   /**
+   * rearrange the selected options to the correct order
+   *
+   * @param select
+   * @param wrapper
+   * @param rearrangeOptionField
+   */
+
+
+  var rearrangeSelectedOptions = function rearrangeSelectedOptions(select, wrapper, rearrangeOptionField) {
+    var optionAddElement = wrapper.querySelector('[data-boxdirection="add"]');
+    var orderedOptions = rearrangeOptionField.value.trim().split(moveOptionsValueSplitter);
+    orderedOptions.forEach(function (orderedOption) {
+      orderedOption = orderedOption.trim();
+
+      if (orderedOption) {
+        var optionElement = select.querySelector('option[value=' + orderedOption + ']');
+        var optionIndex = optionElement.index;
+        var optionDiv = wrapper.querySelector('[data-direction="add"][data-index="' + optionIndex + '"]');
+        optionAddElement.appendChild(optionDiv);
+      }
+    });
+  };
+  /**
    * init function
    * hide the default select
    * add the filter and counter
@@ -414,9 +503,10 @@ function SideBySideMultiselect(options) {
 
   selectElements.forEach(function (select) {
     if (checkIfMultiple(select)) {
+      var moveOption = options.moveOption;
       select.style.display = 'none';
       findLabelOfSelectAndSetBlock(select);
-      var wrapper = createSideBySideMultiSelectBoxes(select);
+      var wrapper = createSideBySideMultiSelectBoxes(select, moveOption);
       setSelectOption(select, wrapper);
 
       if (!options.hidefilter) {
@@ -429,8 +519,14 @@ function SideBySideMultiselect(options) {
         calcCounter(select, wrapper);
       }
 
+      if (moveOption) {
+        var rearrangeOptionField = createMoveOptionsField(select, wrapper);
+        rearrangeSelectedOptions(select, wrapper, rearrangeOptionField);
+        addMoveOptionBox(wrapper); // TODO
+      }
+
       wrapper.addEventListener('click', function (e) {
-        addClickEventToOption(e.target, select, wrapper);
+        addClickEventToOption(e.target, select, wrapper, moveOption);
       });
     }
   });

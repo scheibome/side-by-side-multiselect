@@ -16,7 +16,7 @@
     "build:html": "pug src/html/ --out docs -P",
     "build": "npm-run-all clean build:js build:css build:html copy:js",
     "prewatch": "npm run build",
-    "watch:js": "onchange -k src/js/**/* -- npm run build:js",
+    "watch:js": "onchange -k src/js/**/* -- npm-run-all build:js copy:js",
     "watch:scss": "onchange -k src/scss/**/* -- npm run build:css",
     "watch:html": "onchange -k src/html/**/* -- npm run build:html",
     "watch": "npm-run-all --parallel watch:js watch:scss watch:html"

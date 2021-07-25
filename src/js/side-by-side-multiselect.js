@@ -15,6 +15,8 @@ export default function SideBySideMultiselect(options) {
     let counterClassName = (classSettings && classSettings.counterclass) ? classSettings.counterclass : 'side-by-side-multiselect__counter';
     let labelClassName = (classSettings && classSettings.labelclass) ? classSettings.labelclass : 'side-by-side-multiselectlabel';
     let errorText = 'Error, the select must been a multible select';
+    let moveOptionsFieldPrefix = '-move';
+    let moveOptionsValueSplitter = ';';
 
     let labels = options.labels;
     let labelFilter = (labels && labels.filter) ? labels.filter : 'Filter';
@@ -90,12 +92,69 @@ export default function SideBySideMultiselect(options) {
     };
 
     /**
+     * count the selected options and add the number to the html
+     * @param select
+     * @param wrapper
+     */
+    const calcCounter = (select, wrapper) => {
+        let selectedItemsCount = select.querySelectorAll('option:checked');
+        wrapper.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
+    };
+
+    /**
+     * add the clickevent to the options to select the option in the original select and hide or show the selection
+     * @param theTarget
+     * @param select
+     * @param wrapper
+     * @param moveOption
+     */
+    const addClickEventToOption = (theTarget, select, wrapper, moveOption) => {
+        let selectedDataSet = theTarget.dataset;
+        if (theTarget.className === optionClassName && selectedDataSet.direction && selectedDataSet.index) {
+            let selectedIndex = selectedDataSet.index;
+            let selectedValue = selectedDataSet.value;
+            let selectOptions = select.querySelectorAll('option');
+            let orderedOptions;
+            let moveOptionField;
+
+            if (moveOption) {
+                moveOptionField = document.getElementById(select.id + moveOptionsFieldPrefix);
+                orderedOptions = moveOptionField.value.trim();
+            }
+
+            if (selectedDataSet.direction === 'add') {
+                // remove the field only if the ordered option is NOT set
+                if (!moveOption) {
+                    wrapper.querySelector('[data-direction="remove"][data-index="' + selectedIndex + '"]').style.display = 'block';
+                    selectOptions[selectedIndex].selected = false;
+                    theTarget.style.display = 'none';
+                }
+            } else {
+                wrapper.querySelector('[data-direction="add"][data-index="' + selectedIndex + '"]').style.display = 'block';
+                selectOptions[selectedIndex].selected = true;
+                theTarget.style.display = 'none';
+
+                if (moveOption) {
+                    moveOptionField.value = orderedOptions + ' ' + selectedValue + moveOptionsValueSplitter;
+                    rearrangeSelectedOptions(select, wrapper, moveOptionField);
+                }
+            }
+
+            // start the counter Event
+            if (!options.hideCounter) {
+                calcCounter(select, wrapper);
+            }
+        }
+    };
+
+    /**
      * select the focused element and set the focus to the next or prev
      * @param e
      * @param select
      * @param wrapper
+     * @param moveOption
      */
-    const selectOptionViaKeyboard = (e, select, wrapper) => {
+    const selectOptionViaKeyboard = (e, select, wrapper, moveOption) => {
         e.preventDefault();
         let activeElement = document.activeElement;
         let nextSiblingOption = getNextSibling(activeElement, ':not([style="display: none;"]');
@@ -110,16 +169,17 @@ export default function SideBySideMultiselect(options) {
         if (typeof previousSiblingOption !== 'undefined') {
             previousSiblingOption.focus();
         }
-        addClickEventToOption(activeElement, select, wrapper);
+        addClickEventToOption(activeElement, select, wrapper, moveOption);
     };
 
     /**
      * create a single box for the options
      * @param wrapper
      * @param select
+     * @param moveOption
      * @returns {HTMLDivElement}
      */
-    const createSingleBox = (wrapper, select) => {
+    const createSingleBox = (wrapper, select, moveOption) => {
         const singleBox = document.createElement('div');
         singleBox.setAttribute('role', 'listbox');
         singleBox.setAttribute('aria-expanded', 'true');
@@ -129,7 +189,7 @@ export default function SideBySideMultiselect(options) {
             if (e.key === 'ArrowDown' || e.key === 'ArrowUp' ) {
                 setKeyboardUpAndDownSelect(e, singleBox);
             } else if (e.key === ' ' || e.key === 'Enter') {
-                selectOptionViaKeyboard(e, select, wrapper);
+                selectOptionViaKeyboard(e, select, wrapper, moveOption);
             }
         });
         return singleBox;
@@ -138,16 +198,19 @@ export default function SideBySideMultiselect(options) {
     /**
      * create the multiselect wrapper with the eompty inner boxes
      * @param select
+     * @param moveOption
      * @returns {HTMLDivElement}
      */
-    const createSideBySideMultiSelectBoxes = (select) => {
+    const createSideBySideMultiSelectBoxes = (select, moveOption) => {
         const wrapper = document.createElement('div');
         wrapper.classList.add(wrapperClassName);
 
-        const leftBox = createSingleBox(wrapper, select);
+        const leftBox = createSingleBox(wrapper, select, moveOption);
+        leftBox.setAttribute('data-boxdirection', 'remove');
         wrapper.appendChild(leftBox);
 
-        const rightBox = createSingleBox(wrapper, select);
+        const rightBox = createSingleBox(wrapper, select, moveOption);
+        rightBox.setAttribute('data-boxdirection', 'add');
         wrapper.appendChild(rightBox);
 
         select.parentNode.insertBefore(wrapper, select.nextSibling);
@@ -166,6 +229,7 @@ export default function SideBySideMultiselect(options) {
         optionElement.setAttribute('role', 'option');
         optionElement.setAttribute('tabindex', '-1');
         optionElement.classList.add(optionClassName);
+        optionElement.setAttribute('data-value', option.value);
         optionElement.setAttribute('data-index', option.index);
 
         if (direction === 1) {
@@ -194,11 +258,26 @@ export default function SideBySideMultiselect(options) {
     const duplicatesOptions = (option, wrapper) => {
         let selectFields = wrapper.querySelectorAll('.' + boxesClassName);
         if (selectFields.length === 2) {
-            let addedOption = createSelectOption(option, 1, selectFields[1]);
             let removedOption = createSelectOption(option, 0, selectFields[0]);
+            let addedOption = createSelectOption(option, 1, selectFields[1]);
             selectFields[0].appendChild(removedOption);
             selectFields[1].appendChild(addedOption);
         }
+    };
+
+    /**
+     * add a new input field into the form for the ordered selection
+     * @param select
+     * @param wrapper
+     */
+    const createMoveOptionsField = (select, wrapper) => {
+        let moveOptionField = document.createElement('input');
+        moveOptionField.id = select.id + moveOptionsFieldPrefix;
+        moveOptionField.name = select.name.replace('[]', '') + moveOptionsFieldPrefix;
+        moveOptionField.value = select.dataset.selecteditems;
+        // moveOptionField.style.display = 'none'; // TODO ENABLE
+        wrapper.appendChild(moveOptionField);
+        return moveOptionField;
     };
 
     /**
@@ -213,38 +292,6 @@ export default function SideBySideMultiselect(options) {
     };
 
     /**
-     * add the clickevent to the options to select the option in the original select and hide or show the selection
-     * @param theTarget
-     * @param select
-     * @param wrapper
-     */
-    const addClickEventToOption = (theTarget, select, wrapper) => {
-        let selectedDataSet = theTarget.dataset;
-        if (theTarget.className === optionClassName && selectedDataSet.direction && selectedDataSet.index) {
-            let selectedIndex = selectedDataSet.index;
-            let selectOptions = select.querySelectorAll('option');
-            theTarget.style.display = 'none';
-            if (selectedDataSet.direction === 'add') {
-                wrapper.querySelector('[data-direction="remove"][data-index="' + selectedIndex + '"]').style.display = 'block';
-                selectOptions[selectedIndex].selected = false;
-            } else {
-                wrapper.querySelector('[data-direction="add"][data-index="' + selectedIndex + '"]').style.display = 'block';
-                selectOptions[selectedIndex].selected = true;
-            }
-
-            // start the counter Event
-            if (!options.hideCounter) {
-                calcCounter(select, wrapper);
-            }
-        }
-    };
-
-    const calcCounter = (select, wrapper) => {
-        let selectedItemsCount = select.querySelectorAll('option:checked');
-        wrapper.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
-    };
-
-    /**
      * create the counter div with content
      * @returns {*}
      */
@@ -253,6 +300,17 @@ export default function SideBySideMultiselect(options) {
         counterBox.innerText = labelSelected;
         counterBox.classList.add(counterClassName);
         return counterBox;
+    };
+
+    const createMoveButton = () => {
+        let button = document.createElement('button');
+        button.innerText = 'up';
+        return button;
+    };
+
+    const addMoveOptionBox = (wrapper) => {
+        let upButton = createMoveButton();
+        wrapper.appendChild(upButton);
     };
 
     /**
@@ -295,6 +353,12 @@ export default function SideBySideMultiselect(options) {
         });
     };
 
+    /**
+     * create the filter to filter the options
+     * @param select
+     * @param wrapper
+     * @returns {HTMLDivElement}
+     */
     const createFilter = (select, wrapper) => {
         // FilterWrapper
         let filterWrapper = document.createElement('div');
@@ -376,6 +440,27 @@ export default function SideBySideMultiselect(options) {
     };
 
     /**
+     * rearrange the selected options to the correct order
+     *
+     * @param select
+     * @param wrapper
+     * @param rearrangeOptionField
+     */
+    const rearrangeSelectedOptions = (select, wrapper, rearrangeOptionField) => {
+        let optionAddElement = wrapper.querySelector('[data-boxdirection="add"]');
+        let orderedOptions = rearrangeOptionField.value.trim().split(moveOptionsValueSplitter);
+        orderedOptions.forEach(function(orderedOption) {
+            orderedOption = orderedOption.trim();
+            if (orderedOption) {
+                let optionElement = select.querySelector('option[value=' + orderedOption + ']');
+                let optionIndex = optionElement.index;
+                let optionDiv = wrapper.querySelector('[data-direction="add"][data-index="' + optionIndex + '"]');
+                optionAddElement.appendChild(optionDiv);
+            }
+        });
+    };
+
+    /**
      * init function
      * hide the default select
      * add the filter and counter
@@ -383,9 +468,10 @@ export default function SideBySideMultiselect(options) {
      */
     selectElements.forEach(function(select) {
         if (checkIfMultiple(select)) {
+            let moveOption = options.moveOption;
             select.style.display = 'none';
             findLabelOfSelectAndSetBlock(select);
-            let wrapper = createSideBySideMultiSelectBoxes(select);
+            let wrapper = createSideBySideMultiSelectBoxes(select, moveOption);
             setSelectOption(select, wrapper);
 
             if (!options.hidefilter) {
@@ -398,8 +484,14 @@ export default function SideBySideMultiselect(options) {
                 calcCounter(select, wrapper);
             }
 
+            if (moveOption) {
+                let rearrangeOptionField = createMoveOptionsField(select, wrapper);
+                rearrangeSelectedOptions(select, wrapper, rearrangeOptionField);
+                let orderBox = addMoveOptionBox(wrapper); // TODO
+            }
+
             wrapper.addEventListener('click', function(e) {
-                addClickEventToOption(e.target, select, wrapper);
+                addClickEventToOption(e.target, select, wrapper, moveOption);
             });
         }
     });

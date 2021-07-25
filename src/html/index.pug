@@ -57,4 +57,20 @@ html(lang='en')
                     option(value='jquery' name='jquery') jQuery
                     option(value='script' name='script') Script
                 button.btn.btn-primary(type='submit') Submit
+
+            // Without filter and counter
+            h2.text-center.my-5 With order function
+            form(action='#' method='get')
+                select.js-sidebysidemultiselectdemo3#demo3(multiple='multiple', name="tools[]" data-selecteditems="yahoo; google; yandex;")
+                    option(value='google' name='google' selected='selected') Google
+                    option(value='microsoft' name='microsoft') Microsoft
+                    option(value='apple' name='apple') Apple
+                    option(value='amazon' name='amazon') Amazon
+                    option(value='yahoo' name='yahoo' selected='selected') Yahoo
+                    option(value='yandex' name='yandex' selected='selected') Yandex
+                    option(value='polycom' name='polycom') Polycom
+                    option(value='jquery' name='jquery') jQuery
+                    option(value='script' name='script') Script
+                button.btn.btn-primary(type='submit') Submit
+
             script(type="module" src="./demo.js")

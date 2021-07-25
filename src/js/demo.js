@@ -7,5 +7,9 @@ window.onload = function() {
         'hidefilter': true,
         'hideCounter': true,
     });
+    SideBySideMultiselect({
+        'selector': '.js-sidebysidemultiselectdemo3',
+        'moveOption': true
+    });
 };
 
