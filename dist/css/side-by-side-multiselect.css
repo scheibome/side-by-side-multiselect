@@ -68,7 +68,7 @@
       -ms-user-select: none;
           user-select: none;
 }
-.side-by-side-multiselect__option:focus, .side-by-side-multiselect__option:hover {
+.side-by-side-multiselect__option--selected, .side-by-side-multiselect__option:focus, .side-by-side-multiselect__option:hover {
   color: var(--sideBySiteMultiSelectHoverTextColor);
   background-color: var(--sideBySiteMultiSelectColor);
 }

@@ -13,6 +13,7 @@
       var classSettings = options.classSettings;
       var wrapperClassName = classSettings && classSettings.wrapperclass ? classSettings.wrapperclass : 'side-by-side-multiselect';
       var optionClassName = classSettings && classSettings.optionclass ? classSettings.optionclass : 'side-by-side-multiselect__option';
+      var selectedOptionClassName = classSettings && classSettings.optionclass ? classSettings.optionclass : 'side-by-side-multiselect__option--selected';
       var boxesClassName = classSettings && classSettings.boxesclass ? classSettings.boxesclass : 'side-by-side-multiselect__inner';
       var filterWrapperClassName = classSettings && classSettings.filterwrapperclass ? classSettings.filterwrapperclass : 'side-by-side-multiselectfilter';
       var filterClassName = classSettings && classSettings.filterclass ? classSettings.filterclass : 'side-by-side-multiselectfilter__input';
@@ -25,12 +26,35 @@
       var labels = options.labels;
       var labelFilter = labels && labels.filter ? labels.filter : 'Filter';
       var labelSelected = labels && labels.selected ? labels.selected : 'Selected: ';
+
+      var arrayMove = function arrayMove(arr, oldIndex, newIndex) {
+        while (oldIndex < 0) {
+          oldIndex += arr.length;
+        }
+
+        while (newIndex < 0) {
+          newIndex += arr.length;
+        }
+
+        if (newIndex >= arr.length) {
+          var k = newIndex - arr.length + 1;
+
+          while (k--) {
+            arr.push(undefined);
+          }
+        }
+
+        arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
+        console.log(1627215883895, arr);
+        return arr; // for testing purposes
+      };
       /**
        * get the next sibling with given parameter
        * @param elem
        * @param selector
        * @returns {Element}
        */
+
 
       var getNextSibling = function getNextSibling(elem, selector) {
         var sibling = elem.nextElementSibling;
@@ -115,6 +139,79 @@
         wrapper.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
       };
       /**
+       * Returns the select html with the added elements as object
+       *
+       * @param wrapper
+       * @returns {any}
+       */
+
+
+      var getTheAddBox = function getTheAddBox(wrapper) {
+        return wrapper.querySelector('[data-boxdirection="add"]');
+      };
+      /**
+       * returns the field with the ordered elements
+       *
+       * @param select
+       * @returns {HTMLElement}
+       */
+
+
+      var getmoveOptionField = function getmoveOptionField(select) {
+        return document.getElementById(select.id + moveOptionsFieldPrefix);
+      };
+      /**
+       * returns the value of the ordered input field as array
+       * trims the values and remove empty items
+       *
+       * @param input
+       * @returns {string[]}
+       */
+
+
+      var getOrderedOptions = function getOrderedOptions(input) {
+        var array = input.value.trim().split(moveOptionsValueSplitter);
+        array = array.filter(function (value) {
+          return Object.keys(value).length !== 0;
+        });
+        return array.map(function (string) {
+          return string.trim();
+        });
+      };
+      /**
+       * removes the active class from the selection
+       * @param wrapper
+       */
+
+
+      var removeSelectionFromAllOptions = function removeSelectionFromAllOptions(wrapper) {
+        var activeOption = getTheAddBox(wrapper).querySelector('.' + selectedOptionClassName);
+
+        if (activeOption) {
+          activeOption.classList.remove(selectedOptionClassName);
+        }
+      };
+      /**
+       * rearrange the selected options to the correct order
+       *
+       * @param select
+       * @param wrapper
+       * @param rearrangeOptionField
+       */
+
+
+      var rearrangeSelectedOptions = function rearrangeSelectedOptions(select, wrapper, rearrangeOptionField) {
+        var orderedOptions = getOrderedOptions(rearrangeOptionField);
+        orderedOptions.forEach(function (orderedOption) {
+          if (orderedOption) {
+            var optionElement = select.querySelector('option[value=' + orderedOption + ']');
+            var optionIndex = optionElement.index;
+            var optionDiv = wrapper.querySelector('[data-direction="add"][data-index="' + optionIndex + '"]');
+            getTheAddBox(wrapper).appendChild(optionDiv);
+          }
+        });
+      };
+      /**
        * add the clickevent to the options to select the option in the original select and hide or show the selection
        * @param theTarget
        * @param select
@@ -134,13 +231,17 @@
           var moveOptionField;
 
           if (moveOption) {
-            moveOptionField = document.getElementById(select.id + moveOptionsFieldPrefix);
+            moveOptionField = getmoveOptionField(select);
             orderedOptions = moveOptionField.value.trim();
           }
 
           if (selectedDataSet.direction === 'add') {
-            // remove the field only if the ordered option is NOT set
-            if (!moveOption) {
+            if (moveOption) {
+              removeSelectionFromAllOptions(wrapper);
+              theTarget.classList.add(selectedOptionClassName);
+              moveOptionField.setAttribute('data-selected', selectedValue);
+            } else {
+              // remove the field only if the ordered option is NOT set
               wrapper.querySelector('[data-direction="remove"][data-index="' + selectedIndex + '"]').style.display = 'block';
               selectOptions[selectedIndex].selected = false;
               theTarget.style.display = 'none';
@@ -329,16 +430,89 @@
         counterBox.classList.add(counterClassName);
         return counterBox;
       };
+      /**
+       * add the move events to the buttons
+       *
+       * @param button
+       * @param select
+       * @param wrapper
+       * @param position
+       */
 
-      var createMoveButton = function createMoveButton() {
+
+      var addTriggerEventToButton = function addTriggerEventToButton(button, select, wrapper, position) {
+        button.addEventListener('click', function (e) {
+          e.preventDefault();
+          var inputField = getmoveOptionField(select);
+          var selectedItem = inputField.dataset.selected;
+          var activeItemsArray = getOrderedOptions(inputField);
+          var index = activeItemsArray.findIndex(function (items) {
+            return items === selectedItem;
+          });
+          var lastIndexID = activeItemsArray.length - 1;
+          var newValue = '';
+
+          switch (position) {
+            case 0:
+              if (index > 0) {
+                activeItemsArray = arrayMove(activeItemsArray, index, 0);
+              }
+
+              break;
+
+            case -1:
+              if (index > 0) {
+                activeItemsArray = arrayMove(activeItemsArray, index, index + position);
+              }
+
+              break;
+
+            case 1:
+              if (index < lastIndexID) {
+                activeItemsArray = arrayMove(activeItemsArray, index, index + position);
+              }
+
+              break;
+
+            case 'last':
+              if (index < lastIndexID) {
+                activeItemsArray = arrayMove(activeItemsArray, index, lastIndexID);
+              }
+
+              break;
+          }
+
+          activeItemsArray.forEach(function (activeItem) {
+            newValue = newValue + activeItem + moveOptionsValueSplitter;
+          });
+          inputField.value = newValue;
+          rearrangeSelectedOptions(select, wrapper, inputField);
+        });
+      };
+
+      var createMoveButton = function createMoveButton(text) {
         var button = document.createElement('button');
-        button.innerText = 'up';
+        button.innerText = text;
         return button;
       };
 
-      var addMoveOptionBox = function addMoveOptionBox(wrapper) {
-        var upButton = createMoveButton();
-        wrapper.appendChild(upButton);
+      var addMoveOptionBox = function addMoveOptionBox(select, wrapper) {
+        // toTop Button
+        var toTopButton = createMoveButton('to top');
+        addTriggerEventToButton(toTopButton, select, wrapper, 0);
+        wrapper.appendChild(toTopButton); // up Button
+
+        var upButton = createMoveButton('up');
+        addTriggerEventToButton(upButton, select, wrapper, -1);
+        wrapper.appendChild(upButton); // down Button
+
+        var downButton = createMoveButton('down');
+        addTriggerEventToButton(downButton, select, wrapper, 1);
+        wrapper.appendChild(downButton); // toTheBottom Button
+
+        var toTheBottom = createMoveButton('to the bottom');
+        addTriggerEventToButton(toTheBottom, select, wrapper, 'last');
+        wrapper.appendChild(toTheBottom);
       };
       /**
        * Filters the options by the input
@@ -477,29 +651,6 @@
         }
       };
       /**
-       * rearrange the selected options to the correct order
-       *
-       * @param select
-       * @param wrapper
-       * @param rearrangeOptionField
-       */
-
-
-      var rearrangeSelectedOptions = function rearrangeSelectedOptions(select, wrapper, rearrangeOptionField) {
-        var optionAddElement = wrapper.querySelector('[data-boxdirection="add"]');
-        var orderedOptions = rearrangeOptionField.value.trim().split(moveOptionsValueSplitter);
-        orderedOptions.forEach(function (orderedOption) {
-          orderedOption = orderedOption.trim();
-
-          if (orderedOption) {
-            var optionElement = select.querySelector('option[value=' + orderedOption + ']');
-            var optionIndex = optionElement.index;
-            var optionDiv = wrapper.querySelector('[data-direction="add"][data-index="' + optionIndex + '"]');
-            optionAddElement.appendChild(optionDiv);
-          }
-        });
-      };
-      /**
        * init function
        * hide the default select
        * add the filter and counter
@@ -528,7 +679,7 @@
           if (moveOption) {
             var rearrangeOptionField = createMoveOptionsField(select, wrapper);
             rearrangeSelectedOptions(select, wrapper, rearrangeOptionField);
-            addMoveOptionBox(wrapper); // TODO
+            addMoveOptionBox(select, wrapper); // TODO
           }
 
           wrapper.addEventListener('click', function (e) {
