@@ -37,7 +37,6 @@ export default function SideBySideMultiselect(options) {
             }
         }
         arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
-        console.log(1627215883895, arr);
         return arr; // for testing purposes
     };
 
@@ -110,16 +109,6 @@ export default function SideBySideMultiselect(options) {
     };
 
     /**
-     * count the selected options and add the number to the html
-     * @param select
-     * @param wrapper
-     */
-    const calcCounter = (select, wrapper) => {
-        let selectedItemsCount = select.querySelectorAll('option:checked');
-        wrapper.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
-    };
-
-    /**
      * Returns the select html with the added elements as object
      *
      * @param wrapper
@@ -150,6 +139,23 @@ export default function SideBySideMultiselect(options) {
         let array = input.value.trim().split(moveOptionsValueSplitter);
         array = array.filter(value => Object.keys(value).length !== 0);
         return array.map(string => string.trim());
+    };
+
+    /**
+     * count the selected options and add the number to the html
+     * @param select
+     * @param wrapper
+     */
+    const calcCounter = (select, wrapper) => {
+        let selectedItemsCount;
+        if (options.moveOption) {
+            let inputField = getmoveOptionField(select);
+            selectedItemsCount = getOrderedOptions(inputField);
+        } else {
+            selectedItemsCount = select.querySelectorAll('option:checked');
+        }
+
+        wrapper.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
     };
 
     /**
@@ -418,6 +424,11 @@ export default function SideBySideMultiselect(options) {
                         activeItemsArray = arrayMove(activeItemsArray, index, lastIndexID);
                     }
                 break;
+                case 'remove':
+                    activeItemsArray = activeItemsArray.filter(item => item !== selectedItem);
+                    wrapper.querySelector('[data-direction="add"][data-value="' + selectedItem + '"]').style.display = 'none';
+                    wrapper.querySelector('[data-direction="remove"][data-value="' + selectedItem + '"]').style.display = 'block';
+                break;
             }
 
             activeItemsArray.forEach(function(activeItem) {
@@ -426,6 +437,10 @@ export default function SideBySideMultiselect(options) {
 
             inputField.value = newValue;
             rearrangeSelectedOptions(select, wrapper, inputField);
+
+            if (!options.hideCounter) {
+                calcCounter(select, wrapper);
+            }
         });
     };
 
@@ -455,6 +470,11 @@ export default function SideBySideMultiselect(options) {
         let toTheBottom = createMoveButton('to the bottom');
         addTriggerEventToButton(toTheBottom, select, wrapper, 'last');
         wrapper.appendChild(toTheBottom);
+
+        // remove Button
+        let remove = createMoveButton('remove');
+        addTriggerEventToButton(remove, select, wrapper, 'remove');
+        wrapper.appendChild(remove);
     };
 
     /**
@@ -602,17 +622,17 @@ export default function SideBySideMultiselect(options) {
                 wrapper = addFilterInput(select, wrapper);
             }
 
-            if (!options.hideCounter) {
-                let counterBox = addCounter();
-                wrapper.appendChild(counterBox);
-                calcCounter(select, wrapper);
-            }
-
             if (moveOption) {
                 let rearrangeOptionField = createMoveOptionsField(select, wrapper);
                 rearrangeSelectedOptions(select, wrapper, rearrangeOptionField);
                 resetToSelectOptions(select, wrapper);
                 let orderBox = addMoveOptionBox(select, wrapper); // TODO
+            }
+
+            if (!options.hideCounter) {
+                let counterBox = addCounter();
+                wrapper.appendChild(counterBox);
+                calcCounter(select, wrapper);
             }
 
             wrapper.addEventListener('click', function(e) {

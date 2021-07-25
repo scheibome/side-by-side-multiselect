@@ -128,17 +128,6 @@
         }
       };
       /**
-       * count the selected options and add the number to the html
-       * @param select
-       * @param wrapper
-       */
-
-
-      var calcCounter = function calcCounter(select, wrapper) {
-        var selectedItemsCount = select.querySelectorAll('option:checked');
-        wrapper.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
-      };
-      /**
        * Returns the select html with the added elements as object
        *
        * @param wrapper
@@ -177,6 +166,25 @@
         return array.map(function (string) {
           return string.trim();
         });
+      };
+      /**
+       * count the selected options and add the number to the html
+       * @param select
+       * @param wrapper
+       */
+
+
+      var calcCounter = function calcCounter(select, wrapper) {
+        var selectedItemsCount;
+
+        if (options.moveOption) {
+          var inputField = getmoveOptionField(select);
+          selectedItemsCount = getOrderedOptions(inputField);
+        } else {
+          selectedItemsCount = select.querySelectorAll('option:checked');
+        }
+
+        wrapper.querySelector('.' + counterClassName).innerText = labelSelected + selectedItemsCount.length;
       };
       /**
        * removes the active class from the selection
@@ -469,6 +477,14 @@
               }
 
               break;
+
+            case 'remove':
+              activeItemsArray = activeItemsArray.filter(function (item) {
+                return item !== selectedItem;
+              });
+              wrapper.querySelector('[data-direction="add"][data-value="' + selectedItem + '"]').style.display = 'none';
+              wrapper.querySelector('[data-direction="remove"][data-value="' + selectedItem + '"]').style.display = 'block';
+              break;
           }
 
           activeItemsArray.forEach(function (activeItem) {
@@ -476,6 +492,10 @@
           });
           inputField.value = newValue;
           rearrangeSelectedOptions(select, wrapper, inputField);
+
+          if (!options.hideCounter) {
+            calcCounter(select, wrapper);
+          }
         });
       };
 
@@ -501,7 +521,11 @@
 
         var toTheBottom = createMoveButton('to the bottom');
         addTriggerEventToButton(toTheBottom, select, wrapper, 'last');
-        wrapper.appendChild(toTheBottom);
+        wrapper.appendChild(toTheBottom); // remove Button
+
+        var remove = createMoveButton('remove');
+        addTriggerEventToButton(remove, select, wrapper, 'remove');
+        wrapper.appendChild(remove);
       };
       /**
        * Filters the options by the input
@@ -660,17 +684,17 @@
             wrapper = addFilterInput(select, wrapper);
           }
 
-          if (!options.hideCounter) {
-            var counterBox = addCounter();
-            wrapper.appendChild(counterBox);
-            calcCounter(select, wrapper);
-          }
-
           if (moveOption) {
             var rearrangeOptionField = createMoveOptionsField(select, wrapper);
             rearrangeSelectedOptions(select, wrapper, rearrangeOptionField);
             resetToSelectOptions(select, wrapper);
             addMoveOptionBox(select, wrapper); // TODO
+          }
+
+          if (!options.hideCounter) {
+            var counterBox = addCounter();
+            wrapper.appendChild(counterBox);
+            calcCounter(select, wrapper);
           }
 
           wrapper.addEventListener('click', function (e) {
