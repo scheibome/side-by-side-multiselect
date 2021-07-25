@@ -20,8 +20,12 @@ You can check the live demo [right here](https://scheibome.github.io/side-by-sid
     --sideBySiteMultiSelectColor: red;
     --sideBySiteMultiSelectHeight: 200px;
     --sideBySiteMultiSelectSearchFocusColor: yellow;
+    --sideBySiteMultiSelectButtonBackgroundColor: blue;
+    --sideBySiteMultiSelectButtonBorder: 2px solid pink;
     --sideBySiteMultiSelectSearchFocusBgColor: green;
     --sideBySiteMultiSelectBorderWidth: 2px;
+    --sideBySiteMultiSelectOrderSize: 30px;
+    --sideBySiteMultiSelectButtonColor: yellow;
 }
 ~~~
 
@@ -29,11 +33,11 @@ You can check the live demo [right here](https://scheibome.github.io/side-by-sid
 
 ~~~html
 <select class="js-sidebysidemultiselect" id="demo1" multiple="multiple" name="tools[]">
-    <option value="C++" name="C++">C++</option>
-    <option value="JavaScript" name="JavaScript">JavaScript</option>
-    <option value="PHP" name="PHP">PHP</option>
-    <option value="Python" name="Python">Python</option>
-    <option value="Ruby" name="Ruby">Ruby</option>
+    <option value="C++">C++</option>
+    <option value="JavaScript">JavaScript</option>
+    <option value="PHP">PHP</option>
+    <option value="Python">Python</option>
+    <option value="Ruby">Ruby</option>
 </select>
 
 <script src="side-by-side-multiselect.umd.min.js"></script>
@@ -47,15 +51,15 @@ You can check the live demo [right here](https://scheibome.github.io/side-by-sid
 
 ~~~html
 <select class="js-sidebysidemultiselect" id="demo2" multiple="multiple" name="tools[]">
-    <option value="google" name="google" selected="selected">Google</option>
-    <option value="microsoft" name="microsoft">Microsoft</option>
-    <option value="apple" name="apple">Apple</option>
-    <option value="amazon" name="amazon">Amazon</option>
-    <option value="yahoo" name="yahoo" selected="selected">Yahoo</option>
-    <option value="yandex" name="yandex" selected="selected">Yandex</option>
-    <option value="polycom" name="polycom">Polycom</option>
-    <option value="jquery" name="jquery">jQuery</option>
-    <option value="script" name="script">Script</option>
+    <option value="google" selected="selected">Google</option>
+    <option value="microsoft">Microsoft</option>
+    <option value="apple">Apple</option>
+    <option value="amazon">Amazon</option>
+    <option value="yahoo" selected="selected">Yahoo</option>
+    <option value="yandex" selected="selected">Yandex</option>
+    <option value="polycom">Polycom</option>
+    <option value="jquery">jQuery</option>
+    <option value="script">Script</option>
 </select>
 
 <script src="side-by-side-multiselect.umd.min.js"></script>
@@ -88,7 +92,13 @@ SideBySideMultiselect({
         'optionclass': 'your-optionclass',
         'boxesclass': 'your-boxesrclass',
         'searchclass': 'your-searchclass',
-        'counterclass': 'your-counterclass'
+        'counterclass': 'your-counterclass',
+        'orderclass': 'your-orderboxclass'
+    },
+    buttons: {
+        'arrow': 'innerHTML for toTop and ToBottom',
+        'singlearrow': 'innerHTML for up and down',
+        'trashicon': 'innerHTML for remove',
     }
 });
 ~~~
@@ -101,6 +111,8 @@ SideBySideMultiselect({
 | showfilterplaceholder | boolean | `false` | Add a placeholder to the filter input  |
 | classSettings | object | `See options example` | Name of the skin, it will add a class to the lightbox so you can style it with css. |
 | hideCounter | boolean | `false` | Hide the counter |
+| orderOption | boolean | `false` | display the manual order elements |
+| buttons | object | `See options example` | HTML for the Buttons |
 | labels | object | `See options example` | The label content  |
 
 ## Including SideBySideMultiSelect

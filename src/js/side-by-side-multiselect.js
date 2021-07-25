@@ -7,7 +7,7 @@ export default function SideBySideMultiselect(options) {
     let selectElements = (options.selector) ? document.querySelectorAll(options.selector) : document.querySelectorAll('.js-sidebysidemultiselect');
     let classSettings = options.classSettings;
     let wrapperClassName = (classSettings && classSettings.wrapperclass) ? classSettings.wrapperclass : 'side-by-side-multiselect';
-    let orderBoxClassName = (classSettings && classSettings.wrapperclass) ? classSettings.wrapperclass : 'side-by-side-multiselect__order';
+    let orderBoxClassName = (classSettings && classSettings.orderclass) ? classSettings.orderclass : 'side-by-side-multiselect__order';
     let optionClassName = (classSettings && classSettings.optionclass) ? classSettings.optionclass : 'side-by-side-multiselect__option';
     let selectedOptionClassName = (classSettings && classSettings.optionclass) ? classSettings.optionclass : 'side-by-side-multiselect__option--selected';
     let boxesClassName = (classSettings && classSettings.boxesclass) ? classSettings.boxesclass : 'side-by-side-multiselect__inner';
@@ -21,10 +21,23 @@ export default function SideBySideMultiselect(options) {
     let orderClassnamePrefix = '--order';
     let orderOptionsValueSplitter = ';';
 
+    let buttons = options.buttons;
+    let orderButtonIconArrow = (buttons && buttons.arrow) ? buttons.arrow : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19 12l-18 12v-24l18 12zm4-11h-4v22h4v-22z"/></svg>';
+    let orderButtonIconSingleArrow = (buttons && buttons.singlearrow) ? buttons.singlearrow : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 12l18-12v24z"/></svg>';
+    let orderButtonIconTrash = (buttons && buttons.trashicon) ? buttons.trashicon : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/></svg>';
+
     let labels = options.labels;
     let labelFilter = (labels && labels.filter) ? labels.filter : 'Filter';
     let labelSelected = (labels && labels.selected) ? labels.selected : 'Selected: ';
 
+    /**
+     * set element in array to a new index
+     *
+     * @param arr
+     * @param oldIndex
+     * @param newIndex
+     * @returns {*}
+     */
     const arrayMove = (arr, oldIndex, newIndex) => {
         while (oldIndex < 0) {
             oldIndex += arr.length;
@@ -39,7 +52,7 @@ export default function SideBySideMultiselect(options) {
             }
         }
         arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
-        return arr; // for testing purposes
+        return arr;
     };
 
     /**
@@ -362,7 +375,6 @@ export default function SideBySideMultiselect(options) {
         moveOptionField.value = select.dataset.selecteditems;
         moveOptionField.style.display = 'none';
         wrapper.appendChild(moveOptionField);
-        console.log(1627218185086, wrapper);
         return moveOptionField;
     };
 
@@ -406,6 +418,10 @@ export default function SideBySideMultiselect(options) {
             let lastIndexID = activeItemsArray.length - 1;
             let newValue = '';
 
+            if (index === -1) {
+                return;
+            }
+
             switch(position) {
                 case 0:
                     if (index > 0) {
@@ -429,7 +445,9 @@ export default function SideBySideMultiselect(options) {
                 break;
                 case 'remove':
                     activeItemsArray = activeItemsArray.filter(item => item !== selectedItem);
-                    wrapper.querySelector('[data-direction="add"][data-value="' + selectedItem + '"]').style.display = 'none';
+                    let addElement = wrapper.querySelector('[data-direction="add"][data-value="' + selectedItem + '"]');
+                    addElement.style.display = 'none';
+                    addElement.classList.remove(selectedOptionClassName);
                     wrapper.querySelector('[data-direction="remove"][data-value="' + selectedItem + '"]').style.display = 'block';
                 break;
             }
@@ -447,39 +465,56 @@ export default function SideBySideMultiselect(options) {
         });
     };
 
-    const createOrderButton = (text) => {
+    /**
+     * creates a button with innerHtml
+     *
+     * @param html
+     * @returns {HTMLButtonElement}
+     */
+    const createButton = (html) => {
         let button = document.createElement('button');
-        button.innerText = text;
+        button.innerHTML = html;
         return button;
     };
 
+    /**
+     * create the orderbox with classes and the buttons
+     *
+     * @param select
+     * @param wrapper
+     */
     const addOrderOptionBox = (select, wrapper) => {
         let orderBox = document.createElement('div');
         let removeSelectBox = wrapper.querySelector('[data-boxdirection="remove"]');
         orderBox.classList.add(orderBoxClassName);
 
         // toTop Button
-        let toTopButton = createOrderButton('to top');
+        let toTopButton = createButton(orderButtonIconArrow);
+        toTopButton.classList.add('totop');
         addTriggerEventToButton(toTopButton, select, wrapper, 0);
         orderBox.appendChild(toTopButton);
 
         // up Button
-        let upButton = createOrderButton('up');
+        let upButton = createButton(orderButtonIconSingleArrow);
+        upButton.classList.add('up');
         addTriggerEventToButton(upButton, select, wrapper, -1);
         orderBox.appendChild(upButton);
 
         // down Button
-        let downButton = createOrderButton('down');
+        let downButton = createButton(orderButtonIconSingleArrow);
+        downButton.classList.add('down');
         addTriggerEventToButton(downButton, select, wrapper, 1);
         orderBox.appendChild(downButton);
 
         // toTheBottom Button
-        let toTheBottom = createOrderButton('to the bottom');
+        let toTheBottom = createButton(orderButtonIconArrow);
+        toTheBottom.classList.add('tobottom');
         addTriggerEventToButton(toTheBottom, select, wrapper, 'last');
         orderBox.appendChild(toTheBottom);
 
         // remove Button
-        let remove = createOrderButton('remove');
+        let remove = createButton(orderButtonIconTrash);
+        remove.classList.add('trash');
         addTriggerEventToButton(remove, select, wrapper, 'remove');
         orderBox.appendChild(remove);
 

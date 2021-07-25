@@ -18,7 +18,10 @@
           --sideBySiteMultiSelectSearchFocusColor: currentColor;
           --sideBySiteMultiSelectSearchFocusBgColor: var(--bs-light);
           --sideBySiteMultiSelectBorderWidth: 2px;
-          --sideBySiteMultiSelectOrderWidth: 70px;
+          --sideBySiteMultiSelectOrderSize: 30px;
+          --sideBySiteMultiSelectButtonBackgroundColor: var(--bs-light);
+          --sideBySiteMultiSelectButtonBorder: 2px solid var(--bs-dark);
+          --sideBySiteMultiSelectButtonColor: var(--bs-dark);
       }
     </style>
   </head>
@@ -36,15 +39,15 @@
       <h2 class="text-center my-5">Default Setup</h2>
       <form action="#" method="get">
         <select class="js-sidebysidemultiselect" id="demo1" multiple="multiple" name="tools[]">
-          <option value="google" name="google" selected="selected">Google</option>
-          <option value="microsoft" name="microsoft">Microsoft</option>
-          <option value="apple" name="apple">Apple</option>
-          <option value="amazon" name="amazon">Amazon</option>
-          <option value="yahoo" name="yahoo" selected="selected">Yahoo</option>
-          <option value="yandex" name="yandex" selected="selected">Yandex</option>
-          <option value="polycom" name="polycom">Polycom</option>
-          <option value="jquery" name="jquery">jQuery</option>
-          <option value="script" name="script">Script</option>
+          <option value="google" selected="selected">Google</option>
+          <option value="microsoft">Microsoft</option>
+          <option value="apple">Apple</option>
+          <option value="amazon">Amazon</option>
+          <option value="yahoo" selected="selected">Yahoo</option>
+          <option value="yandex" selected="selected">Yandex</option>
+          <option value="polycom">Polycom</option>
+          <option value="jquery">jQuery</option>
+          <option value="script">Script</option>
         </select>
         <button class="btn btn-primary" type="submit">Submit</button>
       </form>
@@ -52,15 +55,15 @@
       <h2 class="text-center my-5">Without Filter and Counter</h2>
       <form action="#" method="get">
         <select class="js-sidebysidemultiselectdemo2" id="demo2" multiple="multiple" name="tools[]">
-          <option value="google" name="google" selected="selected">Google</option>
-          <option value="microsoft" name="microsoft">Microsoft</option>
-          <option value="apple" name="apple">Apple</option>
-          <option value="amazon" name="amazon">Amazon</option>
-          <option value="yahoo" name="yahoo" selected="selected">Yahoo</option>
-          <option value="yandex" name="yandex" selected="selected">Yandex</option>
-          <option value="polycom" name="polycom">Polycom</option>
-          <option value="jquery" name="jquery">jQuery</option>
-          <option value="script" name="script">Script</option>
+          <option value="google" selected="selected">Google</option>
+          <option value="microsoft">Microsoft</option>
+          <option value="apple">Apple</option>
+          <option value="amazon">Amazon</option>
+          <option value="yahoo" selected="selected">Yahoo</option>
+          <option value="yandex" selected="selected">Yandex</option>
+          <option value="polycom">Polycom</option>
+          <option value="jquery">jQuery</option>
+          <option value="script">Script</option>
         </select>
         <button class="btn btn-primary" type="submit">Submit</button>
       </form>
@@ -68,15 +71,15 @@
       <h2 class="text-center my-5">With order function</h2>
       <form action="#" method="get">
         <select class="js-sidebysidemultiselectdemo3" id="demo3" multiple="multiple" name="tools[]" data-selecteditems="yahoo; google; yandex;" autocomplete="off">
-          <option value="google" name="google" selected="selected">Google</option>
-          <option value="microsoft" name="microsoft">Microsoft</option>
-          <option value="apple" name="apple">Apple</option>
-          <option value="amazon" name="amazon">Amazon</option>
-          <option value="yahoo" name="yahoo" selected="selected">Yahoo</option>
-          <option value="yandex" name="yandex" selected="selected">Yandex</option>
-          <option value="polycom" name="polycom">Polycom</option>
-          <option value="jquery" name="jquery">jQuery</option>
-          <option value="script" name="script">Script</option>
+          <option value="google" selected="selected">Google</option>
+          <option value="microsoft">Microsoft</option>
+          <option value="apple">Apple</option>
+          <option value="amazon">Amazon</option>
+          <option value="yahoo" selected="selected">Yahoo</option>
+          <option value="yandex" selected="selected">Yandex</option>
+          <option value="polycom">Polycom</option>
+          <option value="jquery">jQuery</option>
+          <option value="script">Script</option>
         </select>
         <button class="btn btn-primary" type="submit">Submit</button>
       </form>

@@ -6,7 +6,7 @@ function SideBySideMultiselect(options) {
   var selectElements = options.selector ? document.querySelectorAll(options.selector) : document.querySelectorAll('.js-sidebysidemultiselect');
   var classSettings = options.classSettings;
   var wrapperClassName = classSettings && classSettings.wrapperclass ? classSettings.wrapperclass : 'side-by-side-multiselect';
-  var orderBoxClassName = classSettings && classSettings.wrapperclass ? classSettings.wrapperclass : 'side-by-side-multiselect__order';
+  var orderBoxClassName = classSettings && classSettings.orderclass ? classSettings.orderclass : 'side-by-side-multiselect__order';
   var optionClassName = classSettings && classSettings.optionclass ? classSettings.optionclass : 'side-by-side-multiselect__option';
   var selectedOptionClassName = classSettings && classSettings.optionclass ? classSettings.optionclass : 'side-by-side-multiselect__option--selected';
   var boxesClassName = classSettings && classSettings.boxesclass ? classSettings.boxesclass : 'side-by-side-multiselect__inner';
@@ -19,9 +19,21 @@ function SideBySideMultiselect(options) {
   var orderOptionsFieldPrefix = '-order';
   var orderClassnamePrefix = '--order';
   var orderOptionsValueSplitter = ';';
+  var buttons = options.buttons;
+  var orderButtonIconArrow = buttons && buttons.arrow ? buttons.arrow : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19 12l-18 12v-24l18 12zm4-11h-4v22h4v-22z"/></svg>';
+  var orderButtonIconSingleArrow = buttons && buttons.singlearrow ? buttons.singlearrow : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 12l18-12v24z"/></svg>';
+  var orderButtonIconTrash = buttons && buttons.trashicon ? buttons.trashicon : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/></svg>';
   var labels = options.labels;
   var labelFilter = labels && labels.filter ? labels.filter : 'Filter';
   var labelSelected = labels && labels.selected ? labels.selected : 'Selected: ';
+  /**
+   * set element in array to a new index
+   *
+   * @param arr
+   * @param oldIndex
+   * @param newIndex
+   * @returns {*}
+   */
 
   var arrayMove = function arrayMove(arr, oldIndex, newIndex) {
     while (oldIndex < 0) {
@@ -41,7 +53,7 @@ function SideBySideMultiselect(options) {
     }
 
     arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
-    return arr; // for testing purposes
+    return arr;
   };
   /**
    * get the next sibling with given parameter
@@ -398,7 +410,6 @@ function SideBySideMultiselect(options) {
     moveOptionField.value = select.dataset.selecteditems;
     moveOptionField.style.display = 'none';
     wrapper.appendChild(moveOptionField);
-    console.log(1627218185086, wrapper);
     return moveOptionField;
   };
   /**
@@ -447,6 +458,10 @@ function SideBySideMultiselect(options) {
       var lastIndexID = activeItemsArray.length - 1;
       var newValue = '';
 
+      if (index === -1) {
+        return;
+      }
+
       switch (position) {
         case 0:
           if (index > 0) {
@@ -480,7 +495,9 @@ function SideBySideMultiselect(options) {
           activeItemsArray = activeItemsArray.filter(function (item) {
             return item !== selectedItem;
           });
-          wrapper.querySelector('[data-direction="add"][data-value="' + selectedItem + '"]').style.display = 'none';
+          var addElement = wrapper.querySelector('[data-direction="add"][data-value="' + selectedItem + '"]');
+          addElement.style.display = 'none';
+          addElement.classList.remove(selectedOptionClassName);
           wrapper.querySelector('[data-direction="remove"][data-value="' + selectedItem + '"]').style.display = 'block';
           break;
       }
@@ -496,35 +513,54 @@ function SideBySideMultiselect(options) {
       }
     });
   };
+  /**
+   * creates a button with innerHtml
+   *
+   * @param html
+   * @returns {HTMLButtonElement}
+   */
 
-  var createOrderButton = function createOrderButton(text) {
+
+  var createButton = function createButton(html) {
     var button = document.createElement('button');
-    button.innerText = text;
+    button.innerHTML = html;
     return button;
   };
+  /**
+   * create the orderbox with classes and the buttons
+   *
+   * @param select
+   * @param wrapper
+   */
+
 
   var addOrderOptionBox = function addOrderOptionBox(select, wrapper) {
     var orderBox = document.createElement('div');
     var removeSelectBox = wrapper.querySelector('[data-boxdirection="remove"]');
     orderBox.classList.add(orderBoxClassName); // toTop Button
 
-    var toTopButton = createOrderButton('to top');
+    var toTopButton = createButton(orderButtonIconArrow);
+    toTopButton.classList.add('totop');
     addTriggerEventToButton(toTopButton, select, wrapper, 0);
     orderBox.appendChild(toTopButton); // up Button
 
-    var upButton = createOrderButton('up');
+    var upButton = createButton(orderButtonIconSingleArrow);
+    upButton.classList.add('up');
     addTriggerEventToButton(upButton, select, wrapper, -1);
     orderBox.appendChild(upButton); // down Button
 
-    var downButton = createOrderButton('down');
+    var downButton = createButton(orderButtonIconSingleArrow);
+    downButton.classList.add('down');
     addTriggerEventToButton(downButton, select, wrapper, 1);
     orderBox.appendChild(downButton); // toTheBottom Button
 
-    var toTheBottom = createOrderButton('to the bottom');
+    var toTheBottom = createButton(orderButtonIconArrow);
+    toTheBottom.classList.add('tobottom');
     addTriggerEventToButton(toTheBottom, select, wrapper, 'last');
     orderBox.appendChild(toTheBottom); // remove Button
 
-    var remove = createOrderButton('remove');
+    var remove = createButton(orderButtonIconTrash);
+    remove.classList.add('trash');
     addTriggerEventToButton(remove, select, wrapper, 'remove');
     orderBox.appendChild(remove);
     removeSelectBox.after(orderBox);

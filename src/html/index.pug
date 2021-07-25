@@ -18,7 +18,10 @@ html(lang='en')
                 --sideBySiteMultiSelectSearchFocusColor: currentColor;
                 --sideBySiteMultiSelectSearchFocusBgColor: var(--bs-light);
                 --sideBySiteMultiSelectBorderWidth: 2px;
-                --sideBySiteMultiSelectOrderWidth: 70px;
+                --sideBySiteMultiSelectOrderSize: 30px;
+                --sideBySiteMultiSelectButtonBackgroundColor: var(--bs-light);
+                --sideBySiteMultiSelectButtonBorder: 2px solid var(--bs-dark);
+                --sideBySiteMultiSelectButtonColor: var(--bs-dark);
             }
     body
         a.position-absolute.top-0.end-0.text-light(href='https://github.com/scheibome/side-by-side-multiselect' aria-label='View source on GitHub')
@@ -33,45 +36,45 @@ html(lang='en')
             h2.text-center.my-5 Default Setup
             form(action='#' method='get')
                 select.js-sidebysidemultiselect#demo1(multiple='multiple', name="tools[]")
-                    option(value='google' name='google' selected='selected') Google
-                    option(value='microsoft' name='microsoft') Microsoft
-                    option(value='apple' name='apple') Apple
-                    option(value='amazon' name='amazon') Amazon
-                    option(value='yahoo' name='yahoo' selected='selected') Yahoo
-                    option(value='yandex' name='yandex' selected='selected') Yandex
-                    option(value='polycom' name='polycom') Polycom
-                    option(value='jquery' name='jquery') jQuery
-                    option(value='script' name='script') Script
+                    option(value='google' selected='selected') Google
+                    option(value='microsoft') Microsoft
+                    option(value='apple') Apple
+                    option(value='amazon') Amazon
+                    option(value='yahoo' selected='selected') Yahoo
+                    option(value='yandex' selected='selected') Yandex
+                    option(value='polycom') Polycom
+                    option(value='jquery') jQuery
+                    option(value='script') Script
                 button.btn.btn-primary(type='submit') Submit
 
             // Without filter and counter
             h2.text-center.my-5 Without Filter and Counter
             form(action='#' method='get')
                 select.js-sidebysidemultiselectdemo2#demo2(multiple='multiple', name="tools[]")
-                    option(value='google' name='google' selected='selected') Google
-                    option(value='microsoft' name='microsoft') Microsoft
-                    option(value='apple' name='apple') Apple
-                    option(value='amazon' name='amazon') Amazon
-                    option(value='yahoo' name='yahoo' selected='selected') Yahoo
-                    option(value='yandex' name='yandex' selected='selected') Yandex
-                    option(value='polycom' name='polycom') Polycom
-                    option(value='jquery' name='jquery') jQuery
-                    option(value='script' name='script') Script
+                    option(value='google' selected='selected') Google
+                    option(value='microsoft') Microsoft
+                    option(value='apple') Apple
+                    option(value='amazon') Amazon
+                    option(value='yahoo' selected='selected') Yahoo
+                    option(value='yandex' selected='selected') Yandex
+                    option(value='polycom') Polycom
+                    option(value='jquery') jQuery
+                    option(value='script') Script
                 button.btn.btn-primary(type='submit') Submit
 
             // Without filter and counter
             h2.text-center.my-5 With order function
             form(action='#' method='get')
                 select.js-sidebysidemultiselectdemo3#demo3(multiple='multiple', name="tools[]", data-selecteditems="yahoo; google; yandex;", autocomplete="off")
-                    option(value='google' name='google' selected='selected') Google
-                    option(value='microsoft' name='microsoft') Microsoft
-                    option(value='apple' name='apple') Apple
-                    option(value='amazon' name='amazon') Amazon
-                    option(value='yahoo' name='yahoo' selected='selected') Yahoo
-                    option(value='yandex' name='yandex' selected='selected') Yandex
-                    option(value='polycom' name='polycom') Polycom
-                    option(value='jquery' name='jquery') jQuery
-                    option(value='script' name='script') Script
+                    option(value='google' selected='selected') Google
+                    option(value='microsoft') Microsoft
+                    option(value='apple') Apple
+                    option(value='amazon') Amazon
+                    option(value='yahoo' selected='selected') Yahoo
+                    option(value='yandex' selected='selected') Yandex
+                    option(value='polycom') Polycom
+                    option(value='jquery') jQuery
+                    option(value='script') Script
                 button.btn.btn-primary(type='submit') Submit
 
             script(type="module" src="./demo.js")
