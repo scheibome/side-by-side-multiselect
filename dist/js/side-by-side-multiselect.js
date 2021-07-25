@@ -349,20 +349,8 @@ function SideBySideMultiselect(options) {
 
     if (direction === 1) {
       optionElement.setAttribute('data-direction', 'add');
-
-      if (option.selected) {
-        optionElement.style.display = 'block';
-      } else {
-        optionElement.style.display = 'none';
-      }
     } else {
       optionElement.setAttribute('data-direction', 'remove');
-
-      if (option.selected) {
-        optionElement.style.display = 'none';
-      } else {
-        optionElement.style.display = 'block';
-      }
     }
 
     return optionElement;
@@ -378,8 +366,8 @@ function SideBySideMultiselect(options) {
     var selectFields = wrapper.querySelectorAll('.' + boxesClassName);
 
     if (selectFields.length === 2) {
-      var removedOption = createSelectOption(option, 0, selectFields[0]);
-      var addedOption = createSelectOption(option, 1, selectFields[1]);
+      var removedOption = createSelectOption(option, 0);
+      var addedOption = createSelectOption(option, 1);
       selectFields[0].appendChild(removedOption);
       selectFields[1].appendChild(addedOption);
     }
@@ -398,6 +386,7 @@ function SideBySideMultiselect(options) {
     moveOptionField.value = select.dataset.selecteditems; // moveOptionField.style.display = 'none'; // TODO ENABLE
 
     wrapper.appendChild(moveOptionField);
+    console.log(1627218185086, wrapper);
     return moveOptionField;
   };
   /**
@@ -659,6 +648,7 @@ function SideBySideMultiselect(options) {
       findLabelOfSelectAndSetBlock(select);
       var wrapper = createSideBySideMultiSelectBoxes(select, moveOption);
       setSelectOption(select, wrapper);
+      resetToSelectOptions(select, wrapper);
 
       if (!options.hidefilter) {
         wrapper = addFilterInput(select, wrapper);
@@ -673,6 +663,7 @@ function SideBySideMultiselect(options) {
       if (moveOption) {
         var rearrangeOptionField = createMoveOptionsField(select, wrapper);
         rearrangeSelectedOptions(select, wrapper, rearrangeOptionField);
+        resetToSelectOptions(select, wrapper);
         addMoveOptionBox(select, wrapper); // TODO
       }
 

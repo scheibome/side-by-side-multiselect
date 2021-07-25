@@ -320,18 +320,8 @@ export default function SideBySideMultiselect(options) {
 
         if (direction === 1) {
             optionElement.setAttribute('data-direction', 'add');
-            if(option.selected) {
-                optionElement.style.display = 'block';
-            } else {
-                optionElement.style.display = 'none';
-            }
         } else {
             optionElement.setAttribute('data-direction', 'remove');
-            if(option.selected) {
-                optionElement.style.display = 'none';
-            } else {
-                optionElement.style.display = 'block';
-            }
         }
         return optionElement;
     };
@@ -344,8 +334,8 @@ export default function SideBySideMultiselect(options) {
     const duplicatesOptions = (option, wrapper) => {
         let selectFields = wrapper.querySelectorAll('.' + boxesClassName);
         if (selectFields.length === 2) {
-            let removedOption = createSelectOption(option, 0, selectFields[0]);
-            let addedOption = createSelectOption(option, 1, selectFields[1]);
+            let removedOption = createSelectOption(option, 0);
+            let addedOption = createSelectOption(option, 1);
             selectFields[0].appendChild(removedOption);
             selectFields[1].appendChild(addedOption);
         }
@@ -363,6 +353,7 @@ export default function SideBySideMultiselect(options) {
         moveOptionField.value = select.dataset.selecteditems;
         // moveOptionField.style.display = 'none'; // TODO ENABLE
         wrapper.appendChild(moveOptionField);
+        console.log(1627218185086, wrapper);
         return moveOptionField;
     };
 
@@ -605,6 +596,7 @@ export default function SideBySideMultiselect(options) {
             findLabelOfSelectAndSetBlock(select);
             let wrapper = createSideBySideMultiSelectBoxes(select, moveOption);
             setSelectOption(select, wrapper);
+            resetToSelectOptions(select, wrapper);
 
             if (!options.hidefilter) {
                 wrapper = addFilterInput(select, wrapper);
@@ -619,6 +611,7 @@ export default function SideBySideMultiselect(options) {
             if (moveOption) {
                 let rearrangeOptionField = createMoveOptionsField(select, wrapper);
                 rearrangeSelectedOptions(select, wrapper, rearrangeOptionField);
+                resetToSelectOptions(select, wrapper);
                 let orderBox = addMoveOptionBox(select, wrapper); // TODO
             }
 
