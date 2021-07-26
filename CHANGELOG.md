@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.4.2
+
+- [BUGFIX] add missing quotation marks
+
+## 1.4.1
+
+- [BUGFIX] display an error in console if the selection and the given data not the same number
+- [CLEANUP] remove unused scss
+
 ## 1.4.0
 
 - [FEATURE] add a manual order option
