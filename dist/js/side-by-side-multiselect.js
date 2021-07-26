@@ -406,6 +406,7 @@ function SideBySideMultiselect(options) {
 
   var createMoveOptionsField = function createMoveOptionsField(select, wrapper) {
     var moveOptionField = document.createElement('input');
+    moveOptionField.type = 'hidden';
     moveOptionField.id = select.id + orderOptionsFieldPrefix;
     moveOptionField.name = select.name.replace('[]', '') + orderOptionsFieldPrefix;
 
@@ -418,7 +419,6 @@ function SideBySideMultiselect(options) {
       console.log(errorTextOrder, ':', select);
     }
 
-    moveOptionField.style.display = 'none';
     wrapper.appendChild(moveOptionField);
     return moveOptionField;
   };

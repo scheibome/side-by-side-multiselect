@@ -371,6 +371,7 @@ export default function SideBySideMultiselect(options) {
      */
     const createMoveOptionsField = (select, wrapper) => {
         let moveOptionField = document.createElement('input');
+        moveOptionField.type = 'hidden';
         moveOptionField.id = select.id + orderOptionsFieldPrefix;
         moveOptionField.name = select.name.replace('[]', '') + orderOptionsFieldPrefix;
         if (select.dataset.selecteditems) {
@@ -380,7 +381,6 @@ export default function SideBySideMultiselect(options) {
         if (select.querySelectorAll('option:checked').length !== getOrderedOptions(moveOptionField).length) {
             console.log(errorTextOrder, ':', select);
         }
-        moveOptionField.style.display = 'none';
         wrapper.appendChild(moveOptionField);
         return moveOptionField;
     };
