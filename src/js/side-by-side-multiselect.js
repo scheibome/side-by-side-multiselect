@@ -17,6 +17,7 @@ export default function SideBySideMultiselect(options) {
     let counterClassName = (classSettings && classSettings.counterclass) ? classSettings.counterclass : 'side-by-side-multiselect__counter';
     let labelClassName = (classSettings && classSettings.labelclass) ? classSettings.labelclass : 'side-by-side-multiselectlabel';
     let errorText = 'Error, the select must been a multible select';
+    let errorTextOrder = 'Error, the selected items and the data-selecteditems do not have the same number';
     let orderOptionsFieldPrefix = '-order';
     let orderClassnamePrefix = '--order';
     let orderOptionsValueSplitter = ';';
@@ -372,7 +373,13 @@ export default function SideBySideMultiselect(options) {
         let moveOptionField = document.createElement('input');
         moveOptionField.id = select.id + orderOptionsFieldPrefix;
         moveOptionField.name = select.name.replace('[]', '') + orderOptionsFieldPrefix;
-        moveOptionField.value = select.dataset.selecteditems;
+        if (select.dataset.selecteditems) {
+            moveOptionField.value = select.dataset.selecteditems;
+        }
+        // check if the selection and the data the same size
+        if (select.querySelectorAll('option:checked').length !== getOrderedOptions(moveOptionField).length) {
+            console.log(errorTextOrder, ':', select);
+        }
         moveOptionField.style.display = 'none';
         wrapper.appendChild(moveOptionField);
         return moveOptionField;
@@ -673,7 +680,7 @@ export default function SideBySideMultiselect(options) {
                 let rearrangeOptionField = createMoveOptionsField(select, wrapper);
                 rearrangeSelectedOptions(select, wrapper, rearrangeOptionField);
                 resetToSelectOptions(select, wrapper);
-                let orderBox = addOrderOptionBox(select, wrapper); // TODO
+                addOrderOptionBox(select, wrapper);
             }
 
             if (!options.hideCounter) {

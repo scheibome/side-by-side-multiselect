@@ -22,6 +22,7 @@
       var counterClassName = classSettings && classSettings.counterclass ? classSettings.counterclass : 'side-by-side-multiselect__counter';
       var labelClassName = classSettings && classSettings.labelclass ? classSettings.labelclass : 'side-by-side-multiselectlabel';
       var errorText = 'Error, the select must been a multible select';
+      var errorTextOrder = 'Error, the selected items and the data-selecteditems do not have the same number';
       var orderOptionsFieldPrefix = '-order';
       var orderClassnamePrefix = '--order';
       var orderOptionsValueSplitter = ';';
@@ -413,7 +414,16 @@
         var moveOptionField = document.createElement('input');
         moveOptionField.id = select.id + orderOptionsFieldPrefix;
         moveOptionField.name = select.name.replace('[]', '') + orderOptionsFieldPrefix;
-        moveOptionField.value = select.dataset.selecteditems;
+
+        if (select.dataset.selecteditems) {
+          moveOptionField.value = select.dataset.selecteditems;
+        } // check if the selection and the data the same size
+
+
+        if (select.querySelectorAll('option:checked').length !== getOrderedOptions(moveOptionField).length) {
+          console.log(errorTextOrder, ':', select);
+        }
+
         moveOptionField.style.display = 'none';
         wrapper.appendChild(moveOptionField);
         return moveOptionField;
@@ -737,7 +747,7 @@
             var rearrangeOptionField = createMoveOptionsField(select, wrapper);
             rearrangeSelectedOptions(select, wrapper, rearrangeOptionField);
             resetToSelectOptions(select, wrapper);
-            addOrderOptionBox(select, wrapper); // TODO
+            addOrderOptionBox(select, wrapper);
           }
 
           if (!options.hideCounter) {
