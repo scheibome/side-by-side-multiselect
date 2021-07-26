@@ -197,7 +197,7 @@ export default function SideBySideMultiselect(options) {
         let orderedOptions = getOrderedOptions(rearrangeOptionField);
         orderedOptions.forEach(function(orderedOption) {
             if (orderedOption) {
-                let optionElement = select.querySelector('option[value=' + orderedOption + ']');
+                let optionElement = select.querySelector('option[value="' + orderedOption + '"]');
                 let optionIndex = optionElement.index;
                 let optionDiv = wrapper.querySelector('[data-direction="add"][data-index="' + optionIndex + '"]');
                 getTheAddBox(wrapper).appendChild(optionDiv);
