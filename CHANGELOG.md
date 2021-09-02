@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.4.3
+
+- [FEATURE] Allow overriding order-field name with 'data-sorting-field-name'
+
 ## 1.4.2
 
 - [BUGFIX] add missing quotation marks

@@ -414,7 +414,12 @@
         var moveOptionField = document.createElement('input');
         moveOptionField.type = 'hidden';
         moveOptionField.id = select.id + orderOptionsFieldPrefix;
-        moveOptionField.name = select.name.replace('[]', '') + orderOptionsFieldPrefix;
+
+        if (select.dataset.sortingFieldName) {
+          moveOptionField.name = select.dataset.sortingFieldName;
+        } else {
+          moveOptionField.name = select.name.replace('[]', '') + orderOptionsFieldPrefix;
+        }
 
         if (select.dataset.selecteditems) {
           moveOptionField.value = select.dataset.selecteditems;
