@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.4.4
+
+- [BUGFIX] Remove selected attribute by onselect ordered elements if the option is removed
+
 ## 1.4.3
 
 - [FEATURE] Allow overriding order-field name with 'data-sorting-field-name'
