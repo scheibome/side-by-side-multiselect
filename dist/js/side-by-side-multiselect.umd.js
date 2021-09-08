@@ -458,6 +458,23 @@
         return counterBox;
       };
       /**
+       * returns the index from the option with given value
+       * @param select
+       * @param value
+       * @returns {undefined|number}
+       */
+
+
+      var getIndexOfSelectOptionValue = function getIndexOfSelectOptionValue(select, value) {
+        for (var i = 0; i < select.length; i++) {
+          if (select[i].value === value) {
+            return i;
+          }
+        }
+
+        return undefined;
+      };
+      /**
        * add the move events to the buttons
        *
        * @param button
@@ -513,12 +530,14 @@
               break;
 
             case 'remove':
+              var selectOptions = select.querySelectorAll('option');
               activeItemsArray = activeItemsArray.filter(function (item) {
                 return item !== selectedItem;
               });
               var addElement = wrapper.querySelector('[data-direction="add"][data-value="' + selectedItem + '"]');
               addElement.style.display = 'none';
               addElement.classList.remove(selectedOptionClassName);
+              selectOptions[getIndexOfSelectOptionValue(select, selectedItem)].selected = false;
               wrapper.querySelector('[data-direction="remove"][data-value="' + selectedItem + '"]').style.display = 'block';
               break;
           }
