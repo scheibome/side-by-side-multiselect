@@ -1,27 +1,26 @@
-
 .side-by-side-multiselect {
   $this: &;
+
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-block-end: 1rem;
 
   &filter {
-    position:relative;
+    position: relative;
     width: calc(50% - 0.5rem);
 
     &--order {
-      width: calc(50% - 0.5rem - var(--sideBySiteMultiSelectOrderSize) / 2);
+      width: calc(50% - 0.5rem - var(--sidebysite-multiselect-order-size) / 2);
     }
 
     &__label {
       opacity: 0.6;
       position: absolute;
       display: block;
-      top: 0;
-      left: 0;
-      right: 0;
+      inset-block-start: 0;
+      inset-inline: 0;
       padding: 0.5rem;
       transition: 0.2s ease top, 0.2s ease opacity, 0.2s ease font-size;
       pointer-events: none;
@@ -30,23 +29,23 @@
 
     &__input {
       width: 100%;
-      border: solid var(--sideBySiteMultiSelectColor);
-      border-width: var(--sideBySiteMultiSelectBorderWidth) var(--sideBySiteMultiSelectBorderWidth) 0;
+      border: solid var(--sidebysite-multiselect-color);
+      border-width: var(--sidebysite-multiselect-width) var(--sidebysite-multiselect-width) 0;
       padding: 0.5rem;
       outline: none;
       appearance: none;
       border-radius: 0;
 
       &:focus {
-        color: var(--sideBySiteMultiSelectSearchFocusColor);
-        background-color: var(--sideBySiteMultiSelectSearchFocusBgColor);
+        color: var(--sidebysite-multiselect-focuscolor);
+        background-color: var(--sidebysite-multiselect-focusbgcolor);
       }
 
       &.isfilled,
       &:focus {
         & ~ #{$this}filter__label {
           opacity: 1;
-          top: -2rem;
+          inset-block-start: -2rem;
           font-size: 0.8rem;
         }
       }
@@ -60,16 +59,16 @@
 
   &__inner {
     width: calc(50% - 0.5rem);
-    border: var(--sideBySiteMultiSelectBorderWidth) solid var(--sideBySiteMultiSelectColor);
+    border: var(--sidebysite-multiselect-width) solid var(--sidebysite-multiselect-color);
     overflow-y: auto;
-    height: var(--sideBySiteMultiSelectHeight);
+    height: var(--sidebysite-multiselect-height);
 
     &:focus {
-      background-color: var(--sideBySiteMultiSelectSearchFocusBgColor);
+      background-color: var(--sidebysite-multiselect-focusbgcolor);
     }
 
     #{$this}--order & {
-      width: calc(50% - 0.5rem - var(--sideBySiteMultiSelectOrderSize) / 2);
+      width: calc(50% - 0.5rem - var(--sidebysite-multiselect-order-size) / 2);
     }
   }
 
@@ -77,7 +76,7 @@
     width: 100%;
     font-size: 0.8rem;
     padding: 0.5rem;
-    text-align: right;
+    text-align: end;
   }
 
   &__option {
@@ -88,8 +87,8 @@
     &--selected,
     &:focus,
     &:hover {
-      color: var(--sideBySiteMultiSelectHoverTextColor);
-      background-color: var(--sideBySiteMultiSelectColor);
+      color: var(--sidebysite-multiselect-hover-textcolor);
+      background-color: var(--sidebysite-multiselect-color);
     }
   }
 
@@ -97,7 +96,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
-    width: var(--sideBySiteMultiSelectOrderSize);
+    width: var(--sidebysite-multiselect-order-size);
 
     button {
       margin: 0;
@@ -115,12 +114,12 @@
       // Start the styling
       display: flex;
       align-items: center;
-      background-color: var(--sideBySiteMultiSelectButtonBackgroundColor);
+      background-color: var(--sidebysite-multiselect-button-backgroundcolor);
       padding: 0.5rem;
-      border: var(--sideBySiteMultiSelectButtonBorder);
-      height: var(--sideBySiteMultiSelectOrderSize);
+      border: var(--sidebysite-multiselect-button-border);
+      height: var(--sidebysite-multiselect-order-size);
       font-size: 0;
-      color: var(--sideBySiteMultiSelectButtonColor);
+      color: var(--sidebysite-multiselect-button-color);
 
       &::-moz-focus-inner {
         border: 0;
